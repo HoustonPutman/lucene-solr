@@ -55,21 +55,20 @@ public class FunctionTest extends AbstractAnalyticsStatsTest {
       double div_ld = (double)l/d;
       double pow_if = Math.pow(i,f);
       double pow_ld = Math.pow(l,d);
-      double neg_i = (double)i*-1;
-      double neg_l = (double)l*-1;
+      int neg_i = i*-1;
+      long neg_l = l*-1;
       String dm_2y = (1802+j%DATE) + "-06-30T23:59:59Z";
       String dm_2m = (1800+j%DATE) + "-08-30T23:59:59Z";
       String concat_first = "this is the first"+s;
       String concat_second = "this is the second"+s;
-      String rev = new StringBuilder(s).reverse().toString();
       
       assertU(adoc(AbstractAnalyticsFacetTest.filter("id", "1000" + j, "int_id", "" + i, "long_ld", "" + l, "float_fd", "" + f, 
             "double_dd", "" + d,  "date_dtd", dt, "string_sd", s,
             "add_if_dd", ""+add_if, "add_ldf_dd", ""+add_ldf, "mult_if_dd", ""+mult_if, "mult_ldf_dd", ""+mult_ldf,
             "div_if_dd", ""+div_if, "div_ld_dd", ""+div_ld, "pow_if_dd", ""+pow_if, "pow_ld_dd", ""+pow_ld,
-            "neg_i_dd", ""+neg_i, "neg_l_dd", ""+neg_l, "const_8_dd", "8", "const_10_dd", "10", "dm_2y_dtd", dm_2y, "dm_2m_dtd", dm_2m,
+            "neg_id", ""+neg_i, "neg_ld", ""+neg_l, "const_8_dd", "8", "const_10_dd", "10", "dm_2y_dtd", dm_2y, "dm_2m_dtd", dm_2m,
             "const_00_dtd", "1800-06-30T23:59:59Z", "const_04_dtd", "1804-06-30T23:59:59Z", "const_first_sd", "this is the first", "const_second_sd", "this is the second",
-            "concat_first_sd", concat_first, "concat_second_sd", concat_second, "rev_sd", rev, "miss_dd", ""+d0 )));
+            "concat_first_sd", concat_first, "concat_second_sd", concat_second, "miss_dd", ""+d0 )));
       
       
       if (usually()) {
@@ -208,17 +207,6 @@ public class FunctionTest extends AbstractAnalyticsStatsTest {
     
     result = (String)getStatResult("cr", "max", VAL_TYPE.STRING);
     calculated = (String)getStatResult("cr", "maxc", VAL_TYPE.STRING);
-    assertEquals(getRawResponse(), result, calculated);
-  }
-  
-  @Test
-  public void reverseTest() throws Exception { 
-    String result = (String)getStatResult("rr", "min", VAL_TYPE.STRING);
-    String calculated = (String)getStatResult("rr", "minc", VAL_TYPE.STRING);
-    assertEquals(getRawResponse(), result, calculated);
-    
-    result = (String)getStatResult("rr", "max", VAL_TYPE.STRING);
-    calculated = (String)getStatResult("rr", "maxc", VAL_TYPE.STRING);
     assertEquals(getRawResponse(), result, calculated);
   }
   

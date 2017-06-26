@@ -174,7 +174,7 @@ public class ResponseBuilder
   StatsInfo _statsInfo;
   TermsComponent.TermsHelper _termsHelper;
   SimpleOrderedMap<List<NamedList<Object>>> _pivots;
-  AnalyticsRequestManager _analyticsRequestManager;
+  Object _analyticsRequestManager;
   boolean _isOlapAnalytics;
 
   // Context fields for grouping

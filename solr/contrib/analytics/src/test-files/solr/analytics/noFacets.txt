@@ -1,7 +1,7 @@
-o.sr.s.int_id=sum(int_i)
-o.sr.s.long_ld=sum(long_l)
-o.sr.s.float_fd=sum(float_f)
-o.sr.s.double_dd=sum(double_d)
+o.sr.s.int_id=sum(int_id)
+o.sr.s.long_ld=sum(long_ld)
+o.sr.s.float_fd=sum(float_fd)
+o.sr.s.double_dd=sum(double_dd)
 
 o.sosr.s.int_id=sumofsquares(int_id)
 o.sosr.s.long_ld=sumofsquares(long_ld)

@@ -225,7 +225,7 @@
          stored="true" multiValued="false" docValues="true"/>
 
   <!-- for versioning -->
-  <field name="_version_" type="long" indexed="true" stored="true"/>
+  <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
   <!-- points to the root document of a block of nested documents -->
   <field name="_root_" type="string" indexed="true" stored="true"/>
 

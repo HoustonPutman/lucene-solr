@@ -19,6 +19,7 @@ package org.apache.solr.handler.component;
 import java.io.IOException;
 
 import org.apache.solr.analytics.AnalyticsDriver;
+import org.apache.solr.analytics.AnalyticsRequestManager;
 import org.apache.solr.analytics.AnalyticsRequestParser;
 import org.apache.solr.analytics.ExpressionFactory;
 import org.apache.solr.analytics.stream.AnalyticsShardRequestManager;
@@ -56,13 +57,13 @@ public class AnalyticsComponent extends SearchComponent {
     }
     
     if (rb.doAnalytics) {
-      rb._analyticsRequestManager.sendShards = false;
-      
+      AnalyticsRequestManager reqManager = (AnalyticsRequestManager)rb._analyticsRequestManager;
       // Check to see if the request is distributed
       if (rb.isDistrib) {
-        rb._analyticsRequestManager.sendShards = true;
-        rb._analyticsRequestManager.shardStream = new AnalyticsShardRequestManager(rb.req.getParams(), rb._analyticsRequestManager);
+        reqManager.sendShards = true;
+        reqManager.shardStream = new AnalyticsShardRequestManager(rb.req.getParams(), reqManager);
       } else {
+        reqManager.sendShards = false;
         rb.setNeedDocSet( true );
       }
     }
@@ -73,14 +74,14 @@ public class AnalyticsComponent extends SearchComponent {
     if (!rb.doAnalytics) {
       return;
     }
-    
+    AnalyticsRequestManager reqManager = (AnalyticsRequestManager)rb._analyticsRequestManager;
     // Collect the data and generate a response
-    AnalyticsDriver.drive(rb._analyticsRequestManager, rb.req.getSearcher(), rb.getResults().docSet.getTopFilter(), rb.req);
+    AnalyticsDriver.drive(reqManager, rb.req.getSearcher(), rb.getResults().docSet.getTopFilter(), rb.req);
     
     if (rb._isOlapAnalytics) {
-      rb.rsp.add(AnalyticsResponseHeadings.COMPLETED_OLD_HEADER, rb._analyticsRequestManager.createOldResponse());
+      rb.rsp.add(AnalyticsResponseHeadings.COMPLETED_OLD_HEADER, reqManager.createOldResponse());
     } else {
-      rb.rsp.add(AnalyticsResponseHeadings.COMPLETED_HEADER, rb._analyticsRequestManager.createResponse());
+      rb.rsp.add(AnalyticsResponseHeadings.COMPLETED_HEADER, reqManager.createResponse());
     }
 
     rb.doAnalytics = false;
@@ -89,15 +90,19 @@ public class AnalyticsComponent extends SearchComponent {
   
   @Override
   public int distributedProcess(ResponseBuilder rb) throws IOException {
-    if (!rb.doAnalytics || !rb._analyticsRequestManager.sendShards || rb.stage != ResponseBuilder.STAGE_EXECUTE_QUERY) {
+    if (!rb.doAnalytics || rb.stage != ResponseBuilder.STAGE_EXECUTE_QUERY) {
+      return ResponseBuilder.STAGE_DONE;
+    }
+    AnalyticsRequestManager reqManager = (AnalyticsRequestManager)rb._analyticsRequestManager;
+    if (!reqManager.sendShards){
       return ResponseBuilder.STAGE_DONE;
     }
     
     // Send out a request to each shard and merge the responses into our AnalyticsRequestManager
-    rb._analyticsRequestManager.shardStream.sendRequests(rb.req.getCore().getCoreDescriptor().getCollectionName(),
+    reqManager.shardStream.sendRequests(rb.req.getCore().getCoreDescriptor().getCollectionName(),
         rb.req.getCore().getCoreContainer().getZkController().getZkServerAddress());
     
-    rb._analyticsRequestManager.sendShards = false;
+    reqManager.sendShards = false;
     
     return ResponseBuilder.STAGE_DONE;
   }
@@ -123,11 +128,12 @@ public class AnalyticsComponent extends SearchComponent {
   @Override
   public void finishStage(ResponseBuilder rb) {
     if (rb.doAnalytics && rb.stage == ResponseBuilder.STAGE_GET_FIELDS) {
+      AnalyticsRequestManager reqManager = (AnalyticsRequestManager)rb._analyticsRequestManager;
       // Generate responses from the merged shard data
       if (rb._isOlapAnalytics) {
-        rb.rsp.add(AnalyticsResponseHeadings.COMPLETED_OLD_HEADER, rb._analyticsRequestManager.createOldResponse());
+        rb.rsp.add(AnalyticsResponseHeadings.COMPLETED_OLD_HEADER, reqManager.createOldResponse());
       } else {
-        rb.rsp.add(AnalyticsResponseHeadings.COMPLETED_HEADER, rb._analyticsRequestManager.createResponse());
+        rb.rsp.add(AnalyticsResponseHeadings.COMPLETED_HEADER, reqManager.createResponse());
       }
     }
     

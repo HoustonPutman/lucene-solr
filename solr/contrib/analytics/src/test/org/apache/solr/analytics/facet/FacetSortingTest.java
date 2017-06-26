@@ -16,13 +16,11 @@
  */
 package org.apache.solr.analytics.facet;
 
-import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.analytics.AbstractAnalyticsStatsTest;
 import org.apache.solr.analytics.expression.ExpressionTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-@SuppressCodecs({"Lucene3x","Lucene40","Lucene41","Lucene42","Appending","Asserting"})
 public class FacetSortingTest extends AbstractAnalyticsStatsTest {
   private static String fileName = "facetSorting.txt";
 
@@ -42,7 +40,6 @@ public class FacetSortingTest extends AbstractAnalyticsStatsTest {
     
     assertU(commit());
     String response = h.query(request(fileToStringArr(ExpressionTest.class, fileName)));
-    System.out.println("Response=" + response);
     setResponse(response);
   }
 

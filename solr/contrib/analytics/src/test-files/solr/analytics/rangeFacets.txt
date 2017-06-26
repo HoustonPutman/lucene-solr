@@ -159,12 +159,3 @@ o.mf.rf.date_dtd.g=+4YEARS,+5YEARS
 o.mf.rf.date_dtd.ib=upper
 o.mf.rf.date_dtd.ib=edge
 o.mf.rf.date_dtd.or=all
-
-o.pf.s.mean=mean(float_fd)
-o.pf.hs.min=min(date_dtd)
-o.pf.hs.max=max(date_dtd)
-o.pf.hs.gap=const_str(+5YEARS)
-o.pf.rf=date_dtd
-o.pf.rf.date_dtd.st=result(min)
-o.pf.rf.date_dtd.e=result(max)
-o.pf.rf.date_dtd.g=result(gap)

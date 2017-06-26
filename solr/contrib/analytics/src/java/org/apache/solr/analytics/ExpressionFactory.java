@@ -791,6 +791,7 @@ public class ExpressionFactory {
     // Variables
     addSystemVariableFunction("wmean(a,b)","div(mean(prod(a,b)),sum(b))");
     addSystemVariableFunction("mean(a)","div(sum(a),count(a))");
+    addSystemVariableFunction("sumofsquares(a)","sum(pow(a,2))");
     addSystemVariableFunction("sqrt(a)","pow(a,0.5)");
     addSystemVariableFunction("variance(a)","sub(mean(pow(a,2)),pow(mean(a),2))");
     addSystemVariableFunction("stddev(a)","sqrt(variance(a))");
