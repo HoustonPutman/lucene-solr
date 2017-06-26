@@ -23,10 +23,10 @@ import java.util.function.DoubleConsumer;
 import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.SortedSetDocValues;
-import org.apache.lucene.legacy.LegacyNumericUtils;
 import org.apache.lucene.util.NumericUtils;
 import org.apache.solr.analytics.util.function.FloatConsumer;
 import org.apache.solr.analytics.values.FloatValueStream.CastingFloatValueStream;
+import org.apache.solr.legacy.LegacyNumericUtils;
 import org.apache.solr.schema.TrieFloatField;
 
 /**

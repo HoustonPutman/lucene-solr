@@ -24,8 +24,8 @@ import java.util.function.LongConsumer;
 import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.SortedSetDocValues;
-import org.apache.lucene.legacy.LegacyNumericUtils;
 import org.apache.solr.analytics.values.LongValueStream.CastingLongValueStream;
+import org.apache.solr.legacy.LegacyNumericUtils;
 import org.apache.solr.schema.TrieLongField;
 
 /**
