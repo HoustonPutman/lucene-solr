@@ -63,8 +63,7 @@ public interface DateValue extends DateValueStream, LongValue {
     }
     @Override
     public Object getObject() {
-      long val = getLong();
-      return exists() ? new Date(val) : null;
+      return getDate();
     }
     @Override
     public void streamDates(Consumer<Date> cons) {

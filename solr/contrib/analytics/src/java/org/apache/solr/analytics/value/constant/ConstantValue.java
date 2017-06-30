@@ -16,16 +16,17 @@
  */
 package org.apache.solr.analytics.value.constant;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.solr.analytics.ExpressionFactory.ConstantFunction;
-import org.apache.solr.analytics.value.AnalyticsValue;
 import org.apache.solr.analytics.value.AnalyticsValueStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.handler.extraction.ExtractionDateUtil;
 
 /**
  * The parent class of all constant Analytics values.
@@ -34,7 +35,7 @@ import org.apache.solr.common.SolrException.ErrorCode;
  * <ul>
  * <li> Constant booleans must match one of the following in any case: true, t, false, f
  * <li> Constant strings must be surrounded with "s or 's
- * <li> Constant numbers do not have to be surrounded with anything
+ * <li> Constant numbers do not have to be surrounded with anything (floats are currently not supported)
  * <li> Constant dates must match one of the following patterns
  * <ul> 
  * <li> yyyy-MM-dd
@@ -79,41 +80,22 @@ public abstract class ConstantValue {
     
     // Try to create a number
     try {
-      AnalyticsValue value = new ConstantDoubleValue(Double.parseDouble(param));
-      try {
-        value = new ConstantLongValue(Long.parseLong(param));
-        value = new ConstantIntValue(Integer.parseInt(param));
-      } catch (NumberFormatException e) {
-        value = new ConstantFloatValue(Float.parseFloat(param));
+      long longTemp = Long.parseLong(param);
+      if (longTemp == (int) longTemp) {
+        return new ConstantIntValue((int) longTemp);
+      } else {
+        return new ConstantLongValue(longTemp);
       }
-      return value;
-    } catch (NumberFormatException e) {
-      // The constant is not a number
+    } catch (NumberFormatException e1) {
+      try {
+        return new ConstantDoubleValue(Double.parseDouble(param));
+      } catch (NumberFormatException e2) {}
     }
     
     // Try to create a date
     try {
-      AnalyticsValue value = new ConstantDateValue(dateParserBase.parse(param).getTime());
-      try {
-        return new ConstantDateValue(dateParser1.parse(param).getTime());
-      } catch (Exception e) {}
-      try {
-        return new ConstantDateValue(dateParser2.parse(param).getTime());
-      } catch (Exception e) {}
-      try {
-        return new ConstantDateValue(dateParser3.parse(param).getTime());
-      } catch (Exception e) {}
-      try {
-        return new ConstantDateValue(dateParser4.parse(param).getTime());
-      } catch (Exception e) {}
-      try {
-        return new ConstantDateValue(dateParser5.parse(param).getTime());
-      } catch (Exception e) {}
-      try {
-        return new ConstantDateValue(dateParser6.parse(param).getTime());
-      } catch (Exception e) {}
-      return value;
-    } catch (Exception e) {
+      return new ConstantDateValue(ExtractionDateUtil.parseDate(param).getTime());
+    } catch (ParseException e) {
       throw new SolrException(ErrorCode.BAD_REQUEST,"The parameter "+param+" could not be cast to any constant.");
     }
     

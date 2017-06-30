@@ -71,7 +71,7 @@ import org.apache.solr.common.SolrException.ErrorCode;
  * (e.g. {@value #name}(double,int) will return a double)
  */
 public class FillMissingFunction {
-  public static final String name = "fillmissing";
+  public static final String name = "fill_missing";
 
   public static final CreatorFunction creatorFunction = (params -> {
     if (params.length != 2) {

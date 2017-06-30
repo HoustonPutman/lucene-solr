@@ -84,7 +84,7 @@ class DateMathValueFunction extends AbstractDateValue {
   @Override
   public long getLong() {
     Date date = getDate();
-    return (date == null) ? 0 : date.getTime();
+    return (exists) ? date.getTime() : 0;
   }
   @Override
   public Date getDate() {
