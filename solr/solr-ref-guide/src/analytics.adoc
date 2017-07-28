@@ -1,0 +1,1217 @@
+= Analytics
+:page-shortname: analytics
+:page-permalink: analytics.html
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+:stem: latexmath
+
+[[Analytics-Overview]]
+== Overview
+The Analytics Component is a feature in Solr that allows users to calculate complex statistical expressions over result sets.
+The component enables interacting with data in a variety of ways, both through a diverse set of analytics functions as well as powerful faceting functionality.
+The standard facets are supported within the analytics component with additions that leverage its analytical capabilities.
+
+[[Analytics-RequestSyntax]]
+=== Request Syntax
+
+[source,json]
+.Analytics Request
+----
+analytics = {
+    "functions" :  {
+        "<func name>(<func param>,<func param>)" : "<expression using parameters>",
+        ...
+    },
+    "expressions" : {
+        "<name>" : "expression",
+        ...
+    },
+    "groupings" : {
+        "<name>" : {
+            "expressions" : {
+                "<name>" : "expression",
+                ...
+            },
+            "facets" : {
+                "<name>" : {
+                    "type" : "< value | pivot | range | query >",
+                    ...
+                }
+            }
+        }
+    }
+}
+----
+[NOTE]
+.Optional Parameters
+Either *expressions* or *groupings* must be present in the request, or else there are no analytics to compute.
+*Functions* is always an optional parameter.
+
+[[Analytics-Expressions]]
+== Expressions
+
+Expressions are the way to request peices of information from the analytics component. These are the statistical expressions 
+that you want computed and returned in your response.
+
+[[Analytics-Expressions-Construction]]
+=== Constructing an Expression
+
+An expression can either be a field, constant, mapping function or reduction function. The ways that these can be defined are described below.
+
+[horizontal]
+Constants::
+    Constants are defined in the expression
+Fields::
+    Solr fields that are read from the index. So far Ints, Longs, Floats, Doubles, Booleans and Strings are supported. (Every Solr field used must have DocValues enabled)
+Mapping Functions::
+    Functions that map values for each Solr Document or Reduction
+    * Mapping a Field with another Field or Constant returns a value for every Solr Document
+    * Mapping a Reduction Function with another Reduction Function or Constant returns a single value.
+Reduction Functions::
+    Functions that reduce the values for every Solr Document to a single value.
+
+There are four parts of a expression. (Ordered from the inner most part of the expression to the outer most part)
+
+Fields and Constants _(Required)_::
+    Every leaf of the expression tree, shown below, must be a Field or Constant. Likewise every Field or Constant must be a leaf in the expression tree.
+Mapping of Fields and Constants _(Optional)_::
+    This layer can be as long as need be, or non-existent.
+Reduction Functions _(Required)_::
+    Every path from the root of the expression tree to a Field leaf must contain exactly one reduction function. Constants do not need to be reduced.
+Mapping of Reduction Functions and Constants _(Optional)_::
+    This layer can be as long as need be, or non-existent.
+
+[IMPORTANT]
+.Nested Reduction functions
+====
+All reduction is done together in one step, therefore one Reduction Function cannot rely on the result of another Reduction Function.
+This is why nested reduction functions are not allowed in expressions.
+====
+
+[[Analytics-Expressions-Cardinality]]
+=== Expression Cardinality (Multi-Valued and Single-Valued)
+
+The root of all multi-valued expressions are multi-valued fields. Single-valued expressions can be started with constants or single-valued fields.
+All single-valued expressions can be treated as multi valued expressions that contain one value.
+
+Single-valued expressions and Multi-valued expressions can be used together in many mapping functions, as well as Multi-valued expressions being used alone, and many single-valued expressions being used together. For example:
+
+`add(*<single-valued double>*, *<single-valued double>*, ...)`:: 
+    Returns a *single-valued* double expression where the value of the values of each expression are added.
+`add(*<single-valued double>*, *<multi-valued double>*)`::
+    Returns a *multi-valued* double expression where each value of the second expression is added to the single value of the first expression.
+`add(*<multi-valued double>*, *<single-valued double>*)`::
+    Acts the same as the above function.
+`add(*<multi-valued double>*)`::
+    Returns a *single-valued* double expression which is the sum of the multiple values of the parameter expression.
+
+[[Analytics-Expressions-Types]]
+=== Types and Implicit Casting
+
+The new analytics component currently supports the following types:
+*boolean*, *int*, *long*, *float*, *double*, *date* and *string*.
+These types have one-way implicit casting enabled for the following relationships:
+
+[cols="20,80",options="header"]
+|===
+| Type | Implicitly Casts To
+
+| *Boolean* | String
+
+| *Date* | Long, String
+
+| *Integer* | Long, Float, Double, String
+
+| *Long* | Double, String
+
+| *Float* | Double, String
+
+| *Double* | String
+
+| *String* | _none_
+|===
+
+An implicit cast means that if a function requires a certain type of value as a parameter, arguments will be automatically converted to that type if it is possible.
+For example `concat()` only accepts *String* parameters and since all types can be implicitly cast to *Strings*, any type is accepted as an argument. 
+This also goes for dynamically typed functions. `fillmissing()` requires two arguments of the same type, however two types that implicitly cast to the same type can also be used.
+For example `fill_missing(*<long>*,*<float>*)` will be cast to `fill_missing(*<double>*,*<double>*)` since *long* cannot be cast to *float* and *float* cannot be cast to *long* implicitly.
+
+There is an ordering to implicit casts, where the more specialized type is ordered ahead of the more general type.
+Therefore even though both *Long* and *Float* can be implicitly cast to *Double* and *String*, they will be cast to *Double*.
+This is because *Double* is a more specialized type than *String*, which every type can be cast to.
+The ordering is the same as their order in the above table.
+
+Implicit casting will only occur when an expression will not _"compile"_ without it.
+If an expression follows all typing rules initially, no implicit casting will occur.
+Certain functions such as `string()`, `date()`, `round()`, `floor()`, and `ceil()` act as explicit casts, declaring the type that is desired.
+However `round()`, `floor()` and `cell()` can return either *int* or *long* depending on the argument type.
+
+[[Analytics-Expressions-Provided]]
+=== List of Provided Field Types, Constants and Functions
+
+These are the provided building blocks for constructing expressions.
+
+[[Analytics-Expressions-Provided-Fields]]
+==== Field Types
+
+The following Solr field types are supported. All field types are supported for both multi-valued and single-valued.
+All fields used in expressions must have *DocValues enabled*.
+
+[horizontal]
+String::
+    * StrField
+Boolean::
+    * BoolField
+Integer::
+    * TrieIntField
+    * IntPointField
+Long::
+    * TrieLongField
+    * LongPointField
+Float::
+    * TrieFloatField
+    * FloatPointField
+Double::
+    * TrieDoubleField
+    * DoublePointField
+Date::
+    * TrieDateField
+    * DatePointField
+
+.Multi-valued Field Deduplication
+[WARNING]
+====
+All multi-valued field types, except for *Point Fields*, are deduplicated. So duplicate values for the same field are removed during indexing.
+In order to save duplicates, you must use *Point Fields*.
+====
+
+[[Analytics-Expressions-Provided-Constants]]
+==== Constants
+
+Constants can be included in expressions to use along side fields and functions. The available constants are shown below.
+Constants do not need to be surrounded by any function to define them, they can be used exactly like fields in an expression.
+
+Strings:: There are two possible ways of specifying constant strings, as shown below. 
+* Surrounded by double quotes, inside the quotes both `"` and `\` must be escaped with a `\` character.
++
+`"Inside of 'double' \\ \"quotes\""` *⟹* `Inside of 'double' \ "quotes"`
+* Surrounded by single quotes, inside the quotes both `'` and `\` must be escaped with a `\` character.
++
+`'Inside of "single" \\ \'quotes\''` *⟹* `Inside of "double" \ 'quotes'`
+
+Dates:: Dates can be specified in the same way as they are in solr queries. Just use ISO-8601 format.
+* `2017-07-17T19:35:08Z`
+* `2017-07-17`
+
+Numbers:: Any non-decimal number will be read as an *integer*, or a *long* if it is too large for an integer. All decimal numbers will be read as *doubles*.
+* `-123421` - Integer
+* `800000000000` - Long
+* `230.34` - Double
+
+[[Analytics-Expressions-Provided-MappingFunctions]]
+==== Mapping Functions
+
+[[Analytics-Expressions-Provided-MappingFunctions-Numeric]]
+===== Numeric
+[cols="12,54,34",options="header"]
+|===
+| Name | Syntax | Examples
+
+// Negation
+    .3+.^| *Negation*
+    2+| Negates the result of a numeric expression.
+
+    .2+.^| `*neg*(< _Numeric_ *T* >) *⟹* < *T* >` .^|  `neg(10.53) ⟹ -10.53` .^| `neg([1, -4]) ⟹ [-1, 4]`
+
+3+| 
+// Absolute Value
+    .3+.^| *Absolute Value*
+    2+| Returns the absolute value of the numeric expression.
+
+    .2+.^| `*abs*(< _Numeric_ *T* >) *⟹* < *T* >` .^|  `abs(-10.53) ⟹ 10.53` .^| `abs([1, -4]) ⟹ [1, 4]`
+
+3+| 
+// Addition
+    .5+.^| *Addition*
+    2+| Adds the values of the numeric expressions.
+
+    .^| `*add*(< _Multi Double_ >) *⟹* < _Single Double_ >` .^| `add([1, -4]) ⟹ -3.0`
+    .^| `*add*(< _Single Double_ >, < _Multi Double_ >) *⟹* < _Multi Double_ >` .^| `add(3.5, [1, -4]) ⟹ [4.5, -0.5]`
+    .^| `*add*(< _Multi Double_ >, < _Single Double_ >) *⟹* < _Multi Double_ >` .^| `add([1, -4], 3.5) ⟹ [4.5, -0.5]`
+    .^| `*add*(< _Single Double_ >, ...) *⟹* < _Single Double_ >` .^| `add(3.5, 100, -27.6) ⟹ 75.9`
+
+3+| 
+// Subtraction
+    .4+.^| *Subtraction*
+    2+| Subtracts the values of the numeric expressions.
+
+    .^| `*sub*(< _Single Double_ >, < _Single Double_ >) *⟹* < _Single Double_ >` .^| `sub(3.5, 100) ⟹ -76.5`
+    .^| `*sub*(< _Single Double_ >, < _Multi Double_ >) *⟹* < _Multi Double_ >` .^| `sub(3.5, [1, -4]) ⟹ [2.5, 7.5]`
+    .^| `*sub*(< _Multi Double_ >, < _Single Double_ >) *⟹* < _Multi Double_ >` .^| `sub([1, -4], 3.5) ⟹ [-2.5, -7.5]`
+
+3+| 
+// Multiplication
+    .5+.^| *Multiplication*
+    2+| Multiplies the values of the numeric expressions.
+
+    .^| `*mult*(< _Multi Double_ >) *⟹* < _Single Double_ >` .^| `mult([1, -4]) ⟹ -4.0`
+    .^| `*mult*(< _Single Double_ >, < _Multi Double_ >) *⟹* < _Multi Double_ >` .^| `mult(3.5, [1, -4]) ⟹ [3.5, -16.0]`
+    .^| `*mult*(< _Multi Double_ >, < _Single Double_ >) *⟹* < _Multi Double_ >` .^| `mult([1, -4], 3.5) ⟹ [3.5, 16.0]`
+    .^| `*mult*(< _Single Double_ >, ...) *⟹* < _Single Double_ >` .^| `mult(3.5, 100, -27.6) ⟹ -9660`
+
+3+| 
+// Division
+    .4+.^| *Division*
+    2+| Divides the values of the numeric expressions.
+
+    .^| `*div*(< _Single Double_ >, < _Single Double_ >) *⟹* < _Single Double_ >` | `div(3.5, 100) ⟹ .035`
+    .^| `*div*(< _Single Double_ >, < _Multi Double_ >) *⟹* < _Multi Double_ >` | `div(3.5, [1, -4]) ⟹ [3.5, -0.875]`
+    .^| `*div*(< _Multi Double_ >, < _Single Double_ >) *⟹* < _Multi Double_ >` | `div([1, -4], 25) ⟹ [0.04, -0.16]`
+
+3+| 
+// Power
+    .4+.^| *Power*
+    2+| Takes one numeric expression to the power of another. 
+
+    *NOTE:* The square root function `*sqrt*(< _Double_ >)` can be used as shorthand for  `*pow*(< _Double_ >, .5)`
+
+    .^| `*pow*(< _Single Double_ >, < _Single Double_ >) *⟹* < _Single Double_ >` .^| `pow(2, 4) ⟹ 16.0`
+    .^| `*pow*(< _Single Double_ >, < _Multi Double_ >) *⟹* < _Multi Double_ >` .^| `pow(16, [-1, 0]) ⟹ [0.0625, 1]`
+    .^| `*pow*(< _Multi Double_ >, < _Single Double_ >) *⟹* < _Multi Double_ >` .^| `pow([1, 16], .25) ⟹ [1.0, 2.0]`
+
+3+| 
+// Logarithm
+    .6+.^| *Logarithm*
+    2+| Takes one logarithm of numeric expressions, with an optional second numeric expression as the base.
+    If only one expression is given, the natural log is used.
+
+    .2+.^| `*log*(< _Double_ >) *⟹* < _Double_ >` .^| `log(5) *⟹* 1.6094...` .^| `log([1.0, 100.34]) ⟹ [0.0, 4.6085...]`
+    .^| `*log*(< _Single Double_ >, < _Single Double_ >) *⟹* < _Single Double_ >` .^| `log(2, 4) ⟹ 0.5`
+    .^| `*log*(< _Single Double_ >, < _Multi Double_ >) *⟹* < _Multi Double_ >` .^| `log(16, [2, 4]) ⟹ [4, 2]`
+    .^| `*log*(< _Multi Double_ >, < _Single Double_ >) *⟹* < _Multi Double_ >` .^| `log([81, 3], 9) ⟹ [2.0, 0.5]`
+
+3+| 
+// Round
+    .3+.^| *Round*
+    2+| Rounds the numeric expression to the nearest `Integer` or `Long` value.
+
+    .2+.^| `*round*(< _Float_ >) *⟹* < _Int_ >`
+
+    `*round*(< _Double_ >) *⟹* < _Long_ >`
+    .^| `round(-1.5) ⟹ -1` .^| `round([1.75, 100.34]) ⟹ [2, 100]`
+
+3+| 
+// Ceiling
+    .3+.^| *Ceiling*
+    2+| Rounds the numeric expression to the nearest `Integer` or `Long` value that is *greater than or equal* to the original value.
+
+    .2+.^| `*ceil*(< _Float_ >) *⟹* < _Int_ >`
+
+    `*ceil*(< _Double_ >) *⟹* < _Long_ >`
+    .^| `ceil(5.01) ⟹ 5` .^| `ceil([-4.999, 6.99]) ⟹ [-4, 7]`
+
+3+| 
+// Floor
+    .3+.^| *Floor*
+    2+| Rounds the numeric expression to the nearest `Integer` or `Long` value that is *less than or equal* to the original value.
+
+    .2+.^| `*floor*(< _Float_ >) *⟹* < _Int_ >`
+
+    `*floor*(< _Double_ >) *⟹* < _Long_ >`
+    .^| `floor(5.75) ⟹ 5` .^| `floor([-4.001, 6.01]) ⟹ [-5, 6]`
+|===
+
+[[Analytics-Expressions-Provided-MappingFunctions-Logic]]
+===== Logic
+[cols="12,54,34",options="header"]
+|===
+| Name | Syntax | Examples
+
+// Negation
+    .3+.^| *Negation*
+    2+| Negates the result of a boolean expression.
+
+    .2+.^| `*neg*(< _Bool_ >) *⟹* < _Bool_>` .^|  `neg(F) ⟹ T` .^| `neg([F, T]) ⟹ [T, F]`
+
+3+| 
+// And
+    .5+.^| *And*
+    2+| ANDs the values of the boolean expressions.
+
+    .^| `*and*(< _Multi Bool_ >) *⟹* < _Single Bool_ >` .^| `and([T, F, T]) ⟹ F`
+    .^| `*and*(< _Single Bool_ >, < _Multi Bool_ >) *⟹* < _Multi Bool_ >` .^| `and(F, [T, T]) ⟹ [F, F]`
+    .^| `*and*(< _Multi Bool_ >, < _Single Bool_ >) *⟹* < _Multi Bool_ >` .^| `and([F, T], T) ⟹ [F, T]`
+    .^| `*and*(< _Single Bool_ >, ...) *⟹* < _Single Bool_ >` .^| `and(T, T, T) ⟹ T`
+
+3+| 
+// Or
+    .5+.^| *Or*
+    2+| ORs the values of the boolean expressions.
+
+    .^| `*or*(< _Multi Bool_ >) *⟹* < _Single Bool_ >` .^| `or([T, F, T]) ⟹ T`
+    .^| `*or*(< _Single Bool_ >, < _Multi Bool_ >) *⟹* < _Multi Bool_ >` .^| `or(F, [F, T]) ⟹ [F, T]`
+    .^| `*or*(< _Multi Bool_ >, < _Single Bool_ >) *⟹* < _Multi Bool_ >` .^| `or([F, T], T) ⟹ [T, T]`
+    .^| `*or*(< _Single Bool_ >, ...) *⟹* < _Single Bool_ >` .^| `or(F, F, F) ⟹ F`
+
+3+| 
+// Exists
+    .5+.^| *Exists*
+    2+| Checks whether any value(s) exist for the expression.
+
+    .4+.^| `*exists*( *T* ) *⟹* < _Single Bool_ >` .^| `exists([1, 2, 3]) ⟹ T` .^| `exists([]) ⟹ F` .^| `exists(_empty_) ⟹ F` .^| `exists('abc') ⟹ T`
+|===
+
+[[Analytics-Expressions-Provided-MappingFunctions-Comparison]]
+===== Comparison
+[cols="12,54,34",options="header"]
+|===
+| Name | Syntax | Examples
+
+// Equal
+    .4+.^| *Equality*
+    2+| Checks whether two expressions' values are equal. The parameters must be the same type, after implicit casting.
+
+    .^| `*equal*(< _Single_ *T* >, < _Single_ *T* >) *⟹* < _Single Bool_ >` .^| `equal(F, F) ⟹ T`
+    .^| `*equal*(< _Single_ *T* >, < _Multi_ *T* >) *⟹* < _Multi Bool_ >` .^| `equal("a", ["a", "ab"]) ⟹ [T, F]`
+    .^| `*equal*(< _Multi_ *T* >, < _Single_ *T* >) *⟹* < _Multi Bool_ >` .^| `equal([1.5, -3.0], -3) ⟹ [F, T]`
+
+3+|
+// Greater Than
+    .4+.^| *Greater Than*
+    2+| Checks whether a numeric or `Date` expression's values are greater than another expression's values.
+    The parameters must be the same type, after implicit casting.
+
+    .^| `*gt*(< _Single Numeric/Date_ *T* >, < _Single_ *T* >) *⟹* < _Single Bool_ >` .^| `gt(1800-01-02, 1799-12-20) ⟹ F`
+    .^| `*gt*(< _Single Numeric/Date_ *T* >, < _Multi_ *T* >) *⟹* < _Multi Bool_ >` .^| `gt(30.756, [30, 100]) ⟹ [F, T]`
+    .^| `*gt*(< _Multi Numeric/Date_ *T* >, < _Single_ *T* >) *⟹* < _Multi Bool_ >` .^| `gt([30, 75.6], 30) ⟹ [F, T]`
+
+3+|
+// Greater Than or Equals
+    .4+.^| *Greater Than or Equals*
+    2+| Checks whether a numeric or `Date` expression's values are greater than or equal to another expression's values.
+    The parameters must be the same type, after implicit casting.
+
+    .^| `*gte*(< _Single Numeric/Date_ *T* >, < _Single_ *T* >) *⟹* < _Single Bool_ >` .^| `gte(1800-01-02, 1799-12-20) ⟹ F`
+    .^| `*gte*(< _Single Numeric/Date_ *T* >, < _Multi_ *T* >) *⟹* < _Multi Bool_ >` .^| `gte(30.756, [30, 100]) ⟹ [F, T]`
+    .^| `*gte*(< _Multi Numeric/Date_ *T* >, < _Single_ *T* >) *⟹* < _Multi Bool_ >` .^| `gte([30, 75.6], 30) ⟹ [T, T]`
+
+3+|
+// Less Than
+    .4+.^| *Less Than*
+    2+| Checks whether a numeric or `Date` expression's values are less than another expression's values.
+    The parameters must be the same type, after implicit casting.
+
+    .^| `*lt*(< _Single Numeric/Date_ *T* >, < _Single_ *T* >) *⟹* < _Single Bool_ >` .^| `lt(1800-01-02, 1799-12-20) ⟹ T`
+    .^| `*lt*(< _Single Numeric/Date_ *T* >, < _Multi_ *T* >) *⟹* < _Multi Bool_ >` .^| `lt(30.756, [30, 100]) ⟹ [T, F]`
+    .^| `*lt*(< _Multi Numeric/Date_ *T* >, < _Single_ *T* >) *⟹* < _Multi Bool_ >` .^| `lt([30, 75.6], 30) ⟹ [F, F]`
+
+3+|
+// Greater Than or Equals
+    .4+.^| *Less Than or Equals*
+    2+| Checks whether a numeric or `Date` expression's values are less than or equal to another expression's values.
+    The parameters must be the same type, after implicit casting.
+
+    .^| `*lte*(< _Single Numeric/Date_ *T* >, < _Single_ *T* >) *⟹* < _Single Bool_ >` .^| `lte(1800-01-02, 1799-12-20) ⟹ T`
+    .^| `*lte*(< _Single Numeric/Date_ *T* >, < _Multi_ *T* >) *⟹* < _Multi Bool_ >` .^| `lte(30.756, [30, 100]) ⟹ [T, F]`
+    .^| `*lte*(< _Multi Numeric/Date_ *T* >, < _Single_ *T* >) *⟹* < _Multi Bool_ >` .^| `lte([30, 75.6], 30) ⟹ [T, F]`
+
+3+|
+// Top
+    .3+.^| *Top*
+    2+| Returns the maximum of the numeric, `Date` or `String` expression(s)' values.
+    The parameters must be the same type, after implicit casting.
+    (Currently the only type not compatible is `Boolean`, which will be converted to a `String` implicitly in order to compile the expression)
+
+    .^| `*top*(< _Multi_ *T* >) *⟹* < _Single_ *T* >` .^| `top([30, 400, -10, 0]) ⟹ 400`
+    .^| `*top*(< _Single_ *T* >, ...) *⟹* < _Single_ *T* >` .^| `top("a", 1, "d") ⟹ "d"`
+
+3+|
+// Bottom
+    .3+.^| *Bottom*
+    2+| Returns the minimum of the numeric, `Date` or `String` expression(s)' values.
+    The parameters must be the same type, after implicit casting.
+    (Currently the only type not compatible is `Boolean`, which will be converted to a `String` implicitly in order to compile the expression)
+
+    .^| `*bottom*(< _Multi_ *T* >) *⟹* < _Single_ *T* >` .^| `bottom([30, 400, -10, 0]) ⟹ -10`
+    .^| `*bottom*(< _Single_ *T* >, ...) *⟹* < _Single_ *T* >` .^| `bottom("a", 1, "d") ⟹ "1"`
+|===
+
+[[Analytics-Expressions-Provided-MappingFunctions-Conditional]]
+===== Conditional
+[cols="12,54,34",options="header"]
+|===
+| Name | Syntax | Examples
+
+// If
+    .3+.^| *If*
+    2+| Returns the value(s) of the `THEN` or `ELSE` expressions depending on whether the boolean conditional expression's value is `true` or `false`.
+    The `THEN` and `ELSE` expressions must be of the same type and cardinality after implicit casting is done.
+
+    .2+.^| `*if*(< _Single Bool_>, < *T* >, < *T* >) *⟹* < *T* >` .^| `if(true, "abc", [1,2]) ⟹ ["abc"]` .^| `if(false, "abc", 123) ⟹ "123"`
+
+3+|
+// Replace
+    .4+.^| *Replace*
+    2+| Replace all values from the *1^st^* expression that are equal to the value of the *2^nd^* expression with the value of the *3^rd^* expression.
+    All parameters must be the same type after implicit casting is done.
+
+    .3+.^| `*replace*(< *T* >, < _Single_ *T* >, < _Single_ *T* >) *⟹* < *T* >`
+    .^| `replace([1,3], 3, "4") ⟹ ["1", "4"]` .^| `replace("abc", "abc", 18) ⟹ "18"` .^| `replace("abc", 1, "def") ⟹ "abc"`
+
+3+|
+// Fill Missing
+    .4+.^| *Fill Missing*
+    2+| If the *1^st^* expression does not have values, fill it with the values for the *2^nd^* expression.
+    Both expressions must be of the same type and cardinality after implicit casting is done
+
+    .3+.^| `*fill_missing*(< *T* >, < *T* >) *⟹* < *T* >`
+    .^| `fill_missing([], 3) ⟹ [3]` .^| `fill_missing(_empty_, "abc") ⟹ "abc"` .^| `fill_missing("abc", [1]) ⟹ ["abc"]`
+
+3+|
+// Remove
+    .4+.^| *Remove*
+    2+| Remove all occurences of the *2^nd^* expression's value from the values of the *1^st^* expression.
+    Both expressions must be of the same type after implicit casting is done
+
+    .3+.^| `*remove*(< *T* >, < _Single_ *T* >) *⟹* < *T* >`
+    .^| `remove([1,2,3,2], 2) ⟹ [1, 3]` .^| `remove("1", 1) ⟹ _empty_` .^| `remove(1, "abc") ⟹ "1"`
+
+3+|
+// Filter
+    .5+.^| *Filter*
+    2+| Return the values of the *1^st^* expression if the value of the *2^nd^* expression is `true`, otherwise return no values.
+
+    .4+.^| `*filter*(< *T* >, < _Single Boolean_ >) *⟹* < *T* >`
+    .^| `filter([1,2,3], true) ⟹ [1,2,3]` .^| `filter([1,2,3], false) ⟹ []` .^| `filter("abc", false) ⟹ _empty_` .^| `filter("abc", true) ⟹ 1`
+|===
+
+[[Analytics-Expressions-Provided-MappingFunctions-Date]]
+===== Date
+[cols="12,47,41",options="header"]
+|===
+| Name | Syntax | Examples
+
+// Date Parsing
+    .5+.^| *Date Parse*
+    2+| Explicitly converts the values of a `String` or `Long` expression into `Dates`.
+
+    .2+.^| `*date*(< _String_ >) *⟹* < _Date_ >`
+    .^|  `date('1800-01-02') ⟹ 1800-01-02T&#8203;00:00:00Z`
+    .^| `date(['1800-01-02', '2016-05-23']) ⟹ [1800-01-02T..., 2016-05-23T...]`
+    .2+.^| `*date*(< _Long_ >) *⟹* < _Date_ >`
+    .^|  `date(1232343246648) ⟹ 2009-01-19T&#8203;05:34:06Z`
+    .^| `date([1232343246648, 223234324664]) ⟹ [2009-01-19T..., 1977-01-27T...]`
+
+3+| 
+// Date Math
+    .4+| *Date Math*
+    2+| Compute the given date math strings for the values of a `Date` expression. The date math strings *must* be constant.
+
+    .3+.^| `*date_math*(< _Date_ >, < _Constant String_ >...) *⟹* < _Date_ >`
+    .^| `date_math(1800-04-15, '+1DAY', '-1MONTH') ⟹ 1800-03-16`
+    .^| `date_math([1800-04-15,2016-05-24], '+1DAY', '-1MONTH') ⟹ [1800-03-16, 2016-04-25]`
+|===
+
+[[Analytics-Expressions-Provided-MappingFunctions-String]]
+===== String
+[cols="120,615,265",options="header"]
+|===
+| Name | Syntax | Examples
+
+// Explicit String Casting
+    .3+.^| *Explicit Casting*
+    2+| Explicitly casts the expression to a `String` expression.
+
+    .2+.^| `*string*(< _String_ >) *⟹* < _String_ >` .^| `string(1) ⟹ '1'` .^| `string([1.5, -2.0]) ⟹ ['1.5', '-2.0']`
+
+3+| 
+// Concatenation
+    .6+.^| *Concatenation*
+    2+| Concatenations the values of the `String` expression(s) together.
+
+    .^| `*concat*(< _Multi String_ >) *⟹* < _Single String_ >` .^| `concat(['a','b','c']) ⟹ 'abc'`
+    .^| `*concat*(< _Single String_ >, < _Multi String_ >) *⟹* < _Multi String_ >` .^| `concat(1, ['a','b','c']) ⟹ ['1a','1b','1c']`
+    .^| `*concat*(< _Multi String_ >, < _Single String_ >) *⟹* < _Multi String_ >` .^| `concat(['a','b','c'], 1) ⟹ ['a1','b1','c1']`
+    .2+.^| `*concat*(< _Single String_ >...) *⟹* < _Single String_ >`
+
+    _Empty values are ignored_
+    .^| `concat('a','b','c') ⟹ 'abc'`
+    .^| `concat('a',_empty_,'c') ⟹ 'ac'`
+
+3+| 
+// Separated Concatenation
+    .6+.^| *Separated Concatenation*
+    2+| Concatenations the values of the `String` expression(s) together using the given *constant* `String` value as a separator.
+
+    .^| `*concat_sep*(< _Constant String_ >, < _Multi String_ >) *⟹* < _Single String_ >` .^| `concat_sep('-', ['a','b']) ⟹ 'a-b'`
+    .^| `*concat_sep*(< _Constant String_ >, < _Single String_ >, < _Multi String_ >) *⟹* < _Multi String_ >` .^| `concat_sep(2,1,['a','b']) ⟹ ['12a','12b']`
+    .^| `*concat_sep*(< _Constant String_ >, < _Multi String_ >, < _Single String_ >) *⟹* < _Multi String_ >` .^| `concat_sep(2,['a','b'],1) ⟹ ['a21','b21']`
+    .2+.^| `*concat_sep*(< _Constant String_ >, < _Single String_ >...) *⟹* < _Single String_ >`
+
+    _Empty values are ignored_
+    .^| `concat_sep('-','a',2,3) ⟹ 'a-2-3'`
+    .^| `concat_sep(';','a',_empty_,'c') ⟹ 'a;c'`
+|===
+
+[[Analytics-Expressions-Provided-ReductionFunctions]]
+==== Reduction Functions
+
+[cols="8,49,41",options="header"]
+|===
+| Name | Syntax | Description
+
+// Count
+    .2+.^| *Count*
+
+    .^| `*count*() *⟹* < _Single Long_ >`
+    .2+.^| The number of existing values for an expression. For single-valued expressions, this is equivalent to `*docCount*`.
+    If no expression is given, the number of matching documents is returned.
+    .^| `*count*(< *T* >) *⟹* < _Single Long_ >`
+
+3+| 
+// Doc Count
+    .2+.^| *Doc Count*
+
+    .^| `*doc_count*() *⟹* < _Single Long_ >`
+    .2+.^| The number of documents for which an expression has existing values. For single-valued expressions, this is equivalent to `*count*`.
+    If no expression is given, the number of matching documents is returned.
+    .^| `*doc_count*(< *T* >) *⟹* < _Single Long_ >`
+
+3+| 
+// Missing
+    .^| *Missing*
+
+    .^| `*missing*(< *T* >) *⟹* < _Single Long_ >`
+    .^| The number of documents for which an expression has no existing value.
+
+3+| 
+// Unique
+    .^| *Unique*
+
+    .^| `*unique*(< *T* >) *⟹* < _Single Long_ >`
+    .^| The number of unique values for an expression. This function accepts `Numeric`, `Date` and `String` expressions.
+
+3+| 
+// Minimum
+    .^| *Minimum*
+
+    .^| `*min*(< *T* >) *⟹* < _Single_ *T* >`
+    .^| Returns the minimum value for the expression. This function accepts `Numeric`, `Date` and `String` expressions.
+
+3+| 
+// Maximum
+    .^| *Maximum*
+
+    .^| `*max*(< *T* >) *⟹* < _Single_ *T* >`
+    .^| Returns the maximum value for the expression. This function accepts `Numeric`, `Date` and `String` expressions.
+
+3+| 
+// Sum
+    .^| *Sum*
+
+    .^| `*sum*(< _Double_ >) *⟹* < _Single Double_ >`
+    .^| Returns the sum of all values for the expression.
+
+3+| 
+// Sum of Squares
+    .^| *Sum of Squares*
+
+    .^| `*sumofsquares*(< _Double_ >) *⟹* < _Single Double_ >`
+    .^| Returns the sum of all values, squared, for the expression.
+
+3+| 
+// Variance
+    .^| *Variance*
+
+    .^| `*variance*(< _Double_ >) *⟹* < _Single Double_ >`
+    .^| Returns the variance of all values for the expression.
+
+3+| 
+// Standrad Deviation
+    .^| *Standard Deviation*
+
+    .^| `*stddev*(< _Double_ >) *⟹* < _Single Double_ >`
+    .^| Returns the standard deviation of all values for the expression.
+
+3+| 
+// Mean
+    .^| *Mean*
+
+    .^| `*mean*(< _Double_ >) *⟹* < _Single Double_ >`
+    .^| Returns the arithmetic mean of all values for the expression.
+
+3+| 
+// Weighted Mean
+    .^| *Weighted Mean*
+
+    .^| `*wmean*(< _Double_ >, < _Double_ >) *⟹* < _Single Double_ >`
+    .^| Returns the arithmetic mean of all values for the second expression weighted by the values of the first expression.
+    *NOTE:* The expressions must satisfy the rules for `mult` function parameters.
+
+3+| 
+// Median
+    .^| *Median*
+
+    .^| `*median*(< *T* >) *⟹* < _Single_ *T* >`
+    .^| Returns the median of all values for the expression. This function accepts `Numeric` and `Date` expressions.
+
+3+| 
+// Percentile
+    .^| *Percentile*
+
+    .^| `*percentile*(<Constant Double>, < *T* >) *⟹* < _Single_ *T* >`
+    .^| Calculates the given percentile of all values for the expression.
+    This function accepts `Numeric`, `Date` and `String` expressions for the 2^nd^ parameter.
+    *The 1^st^ parameter must be a constant double between [0, 100).*
+
+3+| 
+// Ordinal
+    .^| *Ordinal*
+
+    .^| `*ordinal*(<Constant Int>, < *T* >) *⟹* < _Single_ *T* >`
+    .^| Calculates the given ordinal of all values for the expression.
+    This function accepts `Numeric`, `Date` and `String` expressions for the 2^nd^ parameter.
+    The *ordinal*, given as the 1^st^ parameter, *must be a constant* `Integer`. 
+
+    If the ordinal is *positive*, the returned value will be the _n^th^_ *smallest* value.
+    If the ordinal is *negative*, the returned value will be the _n^th^_ *largest* value.
+    
+    *0 is not accepted as an ordinal value.*
+|===
+
+[[Analytics-Expressions-Example]]
+=== Example of Complex Expression
+
+One useful reduction not listed above is the geometric mean. 
+The geometric mean is a relatively straightforward calculation:
+[stem]
+++++
+\sqrt[n]{\prod\limits_{i=1}^n x_i}
+++++
+In english, it's the _n^th^_ root of the product of _n_ numbers.
+If the analytics component had a `product()` reduction function built in, this could be expressed as such:
+```
+pow(product(field),div(1,count(field)))
+```
+However the analytics component does not have a `product()` reduction function built in, since it would often lead to overflowing the underlying `double`.
+Therefore a different solution is needed.
+
+With some math, the multiplication can be removed from the equation: (stem:[k] is the result)
+[stem]
+++++
+\prod\limits_{i=1}^n x_i=k^{n} \\
+\Leftrightarrow log_2(\prod\limits_{i=1}^n x_i)=log_2(k^{n}) \\
+\Leftrightarrow \sum\limits_{i=1}^n log_2(x_i)=n\times log_2(k) \\
+\Leftrightarrow \dfrac{\sum\limits_{i=1}^n log_2(x_i)}{n}=log_2(k) \\
+\Leftrightarrow 2^{\dfrac{\sum\limits_{i=1}^n log_2(x_i)}{n}}=k
+++++
+
+This version of the geometric mean equation can be safely calculated with the analytics component using the following expression:
+```
+pow(2,div(sum(log(mult(a),2)),count(a)))
+```
+                                                          
+[[Analytics-VariableFunctions]]
+== Variable Functions
+
+Functions are a way to shorten your expressions and make writing analytics queries easier. They are essentially lambda functions defined in a request.
+
+[source,json]
+.Example Basic Function
+----
+analytics = {
+    "functions" : {
+        "sale()" : "mult(price,quantity)"
+    },
+    "expressions" : {
+        "max_sale" : "max(sale())",
+        "med_sale" : "median(sale())"
+    }
+}
+----
+
+In the above request, instead of writing `mult(price,quantity)` twice a function `sale()` was defined to abstract this idea. Then that function was used in the multiple expressions.
+
+Suppose that we want to look at the sales of specific categories:
+
+[source,json]
+----
+analytics = {
+    "functions" : {
+        "clothing_sale()" : "filter(mult(price,quantity),equal(category,'Clothing'))",
+        "kitchen_sale()" : "filter(mult(price,quantity),equal(category,\"Kitchen\"))"
+    },
+    "expressions" : {
+        "max_clothing_sale" : "max(clothing_sale())"
+      , "med_clothing_sale" : "median(clothing_sale())"
+      , "max_kitchen_sale" : "max(kitchen_sale())"
+      , "med_kitchen_sale" : "median(kitchen_sale())"
+    }
+}
+----
+                                                          
+[[Analytics-VariableFunctions-Arguments]]
+==== Arguments
+
+Instead of making a function for each category, it would be much easier to use category as an input to the `sale()` function.
+An example of this functionality is shown below:
+
+[source,json]
+.Example Function with Arguments
+----
+analytics = {
+    "functions" : {
+        "sale(cat)" : "filter(mult(price,quantity),equal(category,cat))"
+    },
+    "expressions" : {
+        "max_clothing_sale" : "max(sale(\"Clothing\"))"
+      , "med_clothing_sale" : "median(sale('Clothing'))"
+      , "max_kitchen_sale" : "max(sale(\"Kitchen\"))"
+      , "med_kitchen_sale" : "median(sale('Kitchen'))"
+    }
+}
+----
+
+Variable Functions can take any number of arguments and use them in the function expression as if they were a field or constant.
+                                                          
+[[Analytics-VariableFunctions-VariableLengthArguments]]
+==== Variable Length Arguments
+
+There are analytics functions that take a variable amount of parameters.
+Therefore there are use cases where variable functions would need to take a variable amount of parameters.
+For example maybe there are multiple, yet undetermined number of, components to the price of a product.
+Functions can take a variable length of parameters if the last parameter is followed by `..`
+
+[source,json]
+.Example Function with a Variable Length Argument
+----
+analytics = {
+    "functions" : {
+        "sale(cat, costs..)" : "filter(mult(add(costs),quantity),equal(category,cat))"
+    },
+    "expressions" : {
+        "max_clothing_sale" : "max(sale('Clothing', construction_cost, markup, tariff, tax))"
+      , "med_clothing_sale" : "median(sale('Clothing', construction_cost, markup, tariff, tax))"
+      , "max_kitchen_sale" : "max(sale('Kitchen', construction_cost, markup))"
+      , "med_kitchen_sale" : "median(sale('Kitchen', construction_cost, markup))"
+    }
+}
+----
+
+In the above example a variable length argument is used to encapsulate all of the costs to use for a product.
+There is no definite number of arguments requested for the variable length parameter, therefore the clothing expressions can use 4 and the kitchen expressions can use 2.
+When the `sale()` function is called, `costs` is expanded to the arguments given.
+
+Therefore in the above request, inside of the `sale` function:
+
+* `add(costs)`
+
+is expanded to both of the following:
+
+* `add(construction_cost, markup, tariff, tax)`
+* `add(construction_cost, markup)`
+
+[[Analytics-VariableFunctions-VariableLengthArgument-ForEach]]
+==== Variable Length Argument For-Each
+[CAUTION]
+.Advanced Functionality
+====
+The following function details are for advanced requests. 
+====
+
+Although the above functionality allows for an undefined number of arguments to be passed to a function, it does not allow for interacting with those arguments.
+Many times we might want to wrap each argument in additional functions.
+For example maybe we want to be able to look at multiple categories at the same time.
+So we want to see if `category EQUALS x *OR* category EQUALS y` and so on.
+In order to do this we need to use *for-each lambda functions*, which transform each value of the variable length parameter.
+The *for-each* is started with the `:` character after the variable length parameter.
+
+[source,json]
+.Example Function with a Variable Length Argument
+----
+analytics = {
+    "functions" : {
+        "sale(cats..)" : "filter(mult(price,quantity),or(cats:equal(category,_)))"
+    },
+    "expressions" : {
+        "max_sale_1" : "max(sale('Clothing', 'Kitchen'))"
+      , "med_sale_1" : "median(sale('Clothing', 'Kitchen'))"
+      , "max_sale_2" : "max(sale('Electronics', 'Entertainment', 'Travel'))"
+      , "med_sale_2" : "median(sale('Electronics', 'Entertainment', 'Travel'))"
+    }
+}
+----
+
+`cats:` is the syntax that starts a for-each lambda function over every parameter `cats`, and the `\_` character is used to refer to the value of `cats` in each iteration in the for-each.
+Therefore when `sale("Clothing", "Kitchen")` is called the lambda function `equal(category,_)` is applied to both *Clothing* and *Kitchen* inside of the `or()` function.
+
+Using all of these rules
+
+* `sale("Clothing","Kitchen")`
+
+is expanded to
+
+* `filter(mult(price,quantity),or(equal(category,"Kitchen"),equal(category,"Clothing")))`
+
+by the expression parser.
+
+[[Analytics-GroupingsAndFacets]]
+== Groupings And Facets
+
+*Facets*, much like in the rest of Solr, allow analytics results to be broken up and grouped by attributes of the data that the expressions are being calculated over.
+The currently available facets for use in the analytics component are *Value Facets*, *Pivot Facets*, *Range Facets* and *Query Facets*.
+Each facet is required to have a unique name within the grouping it is defined in, and no facet can be defined outside of a grouping.
+
+*Groupings* allow users to calculate the same grouping of expressions over a set of facets.
+Groupings must have both `expressions` and `facets` given.
+And 
+
+[NOTE]
+.Facet Examples
+The examples below will use the following grouping Request and Response bases:
+
+[source,json]
+.Example Base Facet Request
+----
+analytics = {
+    "functions" : {
+        "sale()" : "mult(price,quantity)"
+    },
+    "groupings" : {
+        "sales_numbers" : {
+            "expressions" : {
+                "max_sale" : "max(sale())",
+                "med_sale" : "median(sale())"
+            },
+            "facets" : {
+                < facet requests will be inserted here >
+            }
+        }
+    }
+}
+----
+
+[source,json]
+.Example Base Facet Response
+----
+"analytics_response" : {
+    "groupings" : {
+        "sales_numbers" : {
+            < facet responses will be inserted here >
+        }
+    }
+}
+----
+
+[[Analytics-Facet-Sorting]]
+=== Facet Sorting
+
+Some Analytics facets allow for complex sorting of their results.
+The two current sortable facets are <<Analytics-Facets-Value, Value Facets>> and <<Analytics-Facets-Pivot, Pivot Facets>>.
+
+==== Parameters
+
+
+* *Criteria* - List of criteria to sort the facet by
+** _Criterion_
+*** *Type*
+**** Expression - Sort by the value of an expression defined in the same grouping
+**** Facet Value - Sort by the string-representation of the facet value
+*** *Direction* _(Optional)_
+**** Ascending _(Default)_
+**** Descending
+*** *Expression* when `type = expression` - The name of an expression defined in the same grouping
+* *Limit* _(Optional)_ - Limit the number of returned facet values to the top _N_
+* *Offset* _(Optional)_ - When a limit is set, skip the top _N_ facet values
+
+
+[source,json]
+.Example Sort Request
+----
+"sort" : {
+    "criteria" : [
+        {
+            "type" : "expression",
+            "expression" : "max_sale",
+            "direction" : "ascending"
+        },
+        {
+            "type" : "facetvalue",
+            "direction" : "descending"
+        }
+    ],
+    "limit" : 10,
+    "offset" : 5
+}
+----
+
+[[Analytics-Facets-Value]]
+=== Value Facets
+
+Value Facets are used to group documents by the value of a *mapping expression* applied to each document.
+Mapping expressions are expressions that do not include a *reduction function*.
+For more information, refer to the <<Analytics-Expressions, Expressions>>.
+
+* `mult(quantity, sum(price, tax))` : breakup documents by the revenue generated
+* `fillmissing(state, "N/A")` : breakup documents by state, where *N/A* is used when the document doesn't contain a state
+
+Value Facets can be sorted.
+
+[source,json]
+.Example Value Facet Request
+----
+"categories" : {
+    "type" : "value",
+    "expression" : "fillmissing(category,'No Category')",
+    "sort" : { .. }
+}
+----
+[NOTE]
+.Optional Parameters
+The *sort* parameter is optional.
+
+[source,json]
+.Example Value Facet Response
+----
+"categories" : [
+    ...,
+    {
+        "value" : "Electronics",
+        "results" : {
+            "max_sale" : 103.75,
+            "med_sale" : 15.5
+        }
+    },
+    {
+        "value" : "Kitchen",
+        "results" : {
+            "max_sale" : 88.25,
+            "med_sale" : 11.37
+        }
+    },
+    ...
+]
+----
+
+[NOTE]
+.Field Facets
+This is a replacement for Field Facets in the original Analytics Component.
+Field Facet functionality is mainted in Value Facets by using the name of a field as the expression.
+
+[[Analytics-Facets-Pivot]]
+=== Pivot Facets
+
+Pivot Facets are used to group documents by the value of multiple mapping expression applied to each document.
+Something about drill down.
+
+Pivot Facets work much like layers of <<Analytics-Facets-Value,ValueFacets>>.
+A list of pivots is required, and the order of the list directly impacts the results returned.
+The first pivot given will be treated like a normal value facet.
+The second pivot given will be treated like one value facet for each value of the first pivot.
+Each of these second-level value facets will be limited to the documents in their first-level facet bucket.
+This continues for however many pivots are provided.
+
+Sorting is enabled on a per-pivot basis. This means that if your top pivot has a sort with `limit : 1`, then only that first
+value of the facet will be drilled down into. Sorting in each pivot is independent of the other pivots.
+
+[source,json]
+.Example Pivot Facet Request
+----
+"locations" : {
+    "type" : "pivot",
+    "pivots" : [
+        {
+            "name" : "country",
+            "expression" : "country",
+            "sort" : { .. }
+        },
+        {
+            "name" : "state",
+            "expression" : "fillmissing(state, fillmissing(providence, fillmissing(territory, 'N/A')))",
+            "sort" : { .. }
+        },
+        {
+            "name" : "city",
+            "expression" : "fillmissing(city, "N/A")",
+            "sort" : { .. }
+        }
+    ]
+}
+----
+[NOTE]
+.Optional Parameters
+The *sort* parameter within the pivot object is optional, and can be given in any, none or all of the provided pivots.
+
+
+[source,json]
+.Example Pivot Facet Response
+----
+"locations": [
+    ...,
+    {
+        "pivot" : "Country",
+        "value" : "USA",
+        "results" : {
+            "max_sale" : 103.75,
+            "med_sale" : 15.5
+        },
+        "children" : [
+            ...,
+            {
+                "pivot" : "State",
+                "value" : "Texas",
+                "results" : {
+                    "max_sale" : 99.2,
+                    "med_sale" : 20.35
+                },
+                "children" : [
+                    ...,
+                    {
+                        "pivot" : "City",
+                        "value" : "Austin",
+                        "results" : {
+                            "max_sale" : 94.34,
+                            "med_sale" : 17.60
+                        }
+                    },
+                    ...
+                ]
+            },
+            ...
+        ]
+    },
+    ...
+]
+----
+
+[[Analytics-Facets-Range]]
+=== Range Facets
+
+Range Facets are used to group documents by the value of a field into a given set of ranges.
+The inputs for analytics Range Facets are identical to those used for Solr Range Facets.
+Refer to that documentation for questions regarding use.
+
+[source,json]
+.Example Range Facet Request
+----
+"price_range" : {
+    "type" : "range",
+    "field" : "price",
+    "start" : "0",
+    "end" : "100",
+    "gap" : [
+        "5",
+        "10",
+        "10",
+        "25"
+    ],
+    "hardend" : true,
+    "include" : [
+        "bottom",
+        "top"
+    ],
+    "others" : [
+        "after",
+        "between"
+    ]
+}
+----
+[NOTE]
+.Optional Parameters
+The *hardend*, *include* and *others* parameters are all optional. 
+
+[source,json]
+.Example Range Facet Response
+----
+"price_range": [
+    {
+        "value" : "[0 TO 5]",
+        "results" : {
+            "max_sale" : 4.75,
+            "med_sale" : 3.45
+        }
+    },
+    {
+        "value" : "[5 TO 15]",
+        "results" : {
+            "max_sale" : 13.25,
+            "med_sale" : 10.20
+        }
+    },
+    {
+        "value" : "[15 TO 25]",
+        "results" : {
+            "max_sale" : 22.75,
+            "med_sale" : 18.50
+        }
+    },
+    {
+        "value" : "[25 TO 50]",
+        "results" : {
+            "max_sale" : 47.55,
+            "med_sale" : 30.33
+        }
+    },
+    {
+        "value" : "[50 TO 75]",
+        "results" : {
+            "max_sale" : 70.25,
+            "med_sale" : 64.54
+        }
+    },
+    ...
+]
+----
+
+[[Analytics-Facets-Query]]
+=== Query Facets
+
+Query Facets are used to group documents by given set of queries.
+
+[source,json]
+.Example Query Facet Request
+----
+"high_price_quantities" : {
+    "type" : "query",
+    "queries" : {
+        "high_quantity" : "quantity:[ 5 TO 14 ] AND price:[ 100 TO * ]",
+        "low_quantity" : "quantity:[ 1 TO 4 ] AND price:[ 100 TO * ]"
+    }
+}
+----
+
+[source,json]
+.Example Query Facet Response
+----
+"high_price_quantities": [
+    {
+        "value" : "high_quantity",
+        "results" : {
+            "max_sale" : 4.75,
+            "med_sale" : 3.45
+        }
+    },
+    {
+        "value" : "low_quantity",
+        "results" : {
+            "max_sale" : 13.25,
+            "med_sale" : 10.20
+        }
+    }
+]
+----

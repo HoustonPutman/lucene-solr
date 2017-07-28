@@ -100,7 +100,7 @@ public class LegacyQueryFacetTest extends LegacyAbstractAnalyticsFacetTest {
     
     //Query ascending tests
     setResponse(h.query(request(fileToStringArr(LegacyQueryFacetTest.class, fileName))));
-    System.out.println(getRawResponse());
+
     //Int One
     ArrayList<Double> int1 = getDoubleList("ir", "queryFacets", "float1", "double", "sum");
     ArrayList<Double> int1Test = calculateNumberStat(int1TestStart, "sum");

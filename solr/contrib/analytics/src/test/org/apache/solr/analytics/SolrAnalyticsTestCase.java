@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.solr.JSONTestUtil;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -38,7 +39,7 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.Utils;
 import org.junit.BeforeClass;
 
-public abstract class SolrAnalyticsTestCase extends SolrCloudTestCase {
+public class SolrAnalyticsTestCase extends SolrCloudTestCase {
   private static final double DEFAULT_DELTA = .0000001;
   
   protected static final String COLLECTIONORALIAS = "collection1";
@@ -190,7 +191,7 @@ public abstract class SolrAnalyticsTestCase extends SolrCloudTestCase {
         facets,
         results,
         ", 'sort': { 'criteria' : [{'type': 'facetvalue', 'direction': '" + (sortAscending ? "ascending" : "descending") + "'}]}",
-        (fvp1, fvp2) -> fvp1.facetValue.compareTo(fvp1.facetValue),
+        (fvp1, fvp2) -> fvp1.facetValue.compareTo(fvp2.facetValue),
         sortAscending);
   }
 
@@ -206,7 +207,7 @@ public abstract class SolrAnalyticsTestCase extends SolrCloudTestCase {
         facets,
         results, 
         ", 'sort': { 'criteria' : [{'type': 'expression', 'expression': '" + sortExpression + "', 'direction': '" + (sortAscending ? "ascending" : "descending") + "'}]}",
-        (fvp1, fvp2) -> fvp1.expectedResults.get(sortExpression).compareTo(fvp1.expectedResults.get(sortExpression)),
+        (fvp1, fvp2) -> fvp1.expectedResults.get(sortExpression).compareTo(fvp2.expectedResults.get(sortExpression)),
         sortAscending);
   }
 
@@ -234,15 +235,13 @@ public abstract class SolrAnalyticsTestCase extends SolrCloudTestCase {
     String expressionsStr = expressions.entrySet()
         .stream()
         .map( entry -> '"' + entry.getKey() + "\":\"" + entry.getValue() + '"')
-        .reduce((a,b) -> a + ',' + b)
-        .orElseGet(() -> "");
+        .collect(Collectors.joining(" , "));
     analyticsRequest.append(expressionsStr);
     analyticsRequest.append("}, \"facets\": {");
     String facetsStr = facets.entrySet()
         .stream()
         .map( entry -> '"' + entry.getKey() + "\":" + entry.getValue().replaceFirst("}\\s*$", sort) + "}")
-        .reduce((a,b) -> a + ',' + b)
-        .orElseGet(() -> "");
+        .collect(Collectors.joining(" , "));
     analyticsRequest.append(facetsStr);
     analyticsRequest.append("}}}}");
 
@@ -253,12 +252,10 @@ public abstract class SolrAnalyticsTestCase extends SolrCloudTestCase {
               .stream()
               .sorted(sortAscending ? comparator : comparator.reversed())
               .map( fvp -> fvp.toJsonResults() )
-              .reduce((a,b) -> a + ',' + b)
-              .orElseGet(() -> "");
+              .collect(Collectors.joining(" , "));
           return '"' + facet.getKey() + "\" : [ " + resultList + " ]";
         })
-        .reduce((a,b) -> a + ',' + b)
-        .orElseGet(() -> "");
+        .collect(Collectors.joining(" , "));
     
     testAnalytics(analyticsRequest.toString(), "groupings/" + grouping + "=={"+groupingResults+", \"_UNORDERED_\":true}");
   }
@@ -309,8 +306,7 @@ public abstract class SolrAnalyticsTestCase extends SolrCloudTestCase {
       String valueResults = expectedResults.entrySet()
           .stream()
           .map( result -> '"' + result.getKey() + "\":" + resultToJson(result.getValue()))
-          .reduce((a,b) -> a + ',' + b)
-          .orElseGet(() -> "");
+          .collect(Collectors.joining(" , "));
       return "{ \"value\" : \"" + facetValue + "\", \"results\": { " + valueResults + ", \"_UNORDERED_\":true } }";
     }
 

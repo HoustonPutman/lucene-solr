@@ -16,7 +16,8 @@
  */
 package org.apache.solr.analytics.value.constant;
 
-import java.text.ParseException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +27,6 @@ import org.apache.solr.analytics.value.AnalyticsValue;
 import org.apache.solr.analytics.value.AnalyticsValueStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 
 /**
  * The parent class of all constant Analytics values.
@@ -36,16 +36,7 @@ import org.apache.solr.handler.extraction.ExtractionDateUtil;
  * <li> Constant booleans must match one of the following in any case: true, t, false, f
  * <li> Constant strings must be surrounded with "s or 's
  * <li> Constant numbers do not have to be surrounded with anything (floats are currently not supported)
- * <li> Constant dates must match one of the following patterns
- * <ul> 
- * <li> yyyy-MM-dd
- * <li> yyyy-MM-ddXXX
- * <li> yyyy-MM-dd'T'HH:mm:ssZ
- * <li> yyyy-MM-dd'T'HH:mm:ssXXX
- * <li> yyyy-MM-dd'T'HH:mm:ss.SSSZ
- * <li> yyyy-MM-dd'T'HH:mm:ss.SSSXXX
- * </ul>
- * </li> 
+ * <li> Constant dates must be formated in the ISO-8601 instant format
  * </ul>
  */
 public abstract class ConstantValue implements AnalyticsValue {
@@ -87,8 +78,8 @@ public abstract class ConstantValue implements AnalyticsValue {
     
     // Try to create a date
     try {
-      return new ConstantDateValue(ExtractionDateUtil.parseDate(param).getTime());
-    } catch (ParseException e) {
+      return new ConstantDateValue(Instant.parse(param).toEpochMilli());
+    } catch (DateTimeParseException e) {
       throw new SolrException(ErrorCode.BAD_REQUEST,"The parameter "+param+" could not be cast to any constant.");
     }
     

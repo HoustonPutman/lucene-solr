@@ -35,7 +35,7 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.junit.BeforeClass;
 
-public abstract class LegacyAbstractAnalyticsCloudTest extends SolrCloudTestCase {
+public class LegacyAbstractAnalyticsCloudTest extends SolrCloudTestCase {
   
   protected static final String COLLECTIONORALIAS = "collection1";
   protected static final int TIMEOUT = DEFAULT_TIMEOUT;

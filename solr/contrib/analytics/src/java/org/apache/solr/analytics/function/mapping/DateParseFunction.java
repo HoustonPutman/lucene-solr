@@ -16,7 +16,8 @@
  */
 package org.apache.solr.analytics.function.mapping;
 
-import java.text.ParseException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
@@ -33,7 +34,6 @@ import org.apache.solr.analytics.value.DateValue.AbstractDateValue;
 import org.apache.solr.analytics.value.DateValueStream.AbstractDateValueStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 
 /**
  * A mapping function that converts long or string representations of dates to actual date objects.
@@ -143,23 +143,14 @@ class StringToDateParseFunction extends AbstractDateValue {
   private boolean exists = false;
   @Override
   public long getLong() {
-    Date date = getDate();
     long value = 0;
-    if (exists) {
-      value = date.getTime();
-    }
-    return value;
-  }
-  @Override
-  public Date getDate() {
-    Date value = null;
     try {
       String paramStr = param.getString();
       exists = param.exists();
       if (exists) {
-        value = ExtractionDateUtil.parseDate(paramStr);
+        value = Instant.parse(paramStr).toEpochMilli();
       }
-    } catch (ParseException e) {
+    } catch (DateTimeParseException e) {
       exists = false;
     }
     return value;
@@ -196,20 +187,13 @@ class StringStreamToDateParseFunction extends AbstractDateValueStream {
 
   @Override
   public void streamLongs(LongConsumer cons) {
-    streamDates(value -> cons.accept(value.getTime()));
-  }
-
-  @Override
-  public void streamDates(Consumer<Date> cons) {
     param.streamStrings(value -> {
       try {
-        cons.accept(ExtractionDateUtil.parseDate(value));
-      } catch (ParseException e) {
-      }
+        cons.accept(Instant.parse(value).toEpochMilli());
+      } catch (DateTimeParseException e) {}
     });
   }
 
-  @Override
   public String getName() {
     return name;
   }

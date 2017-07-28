@@ -16,9 +16,8 @@
  */
 package org.apache.solr.analytics.value;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Locale;
 
@@ -32,14 +31,13 @@ import org.apache.solr.analytics.value.constant.ConstantIntValue;
 import org.apache.solr.analytics.value.constant.ConstantLongValue;
 import org.apache.solr.analytics.value.constant.ConstantStringValue;
 import org.apache.solr.analytics.value.constant.ConstantValue;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.junit.Test;
 
 public class ConstantValueTest extends SolrTestCaseJ4 {
   
 
   @Test
-  public void constantParsingTest() throws ParseException {
+  public void constantParsingTest() throws DateTimeParseException {
     // Int
     AnalyticsValueStream uncasted = ConstantValue.creatorFunction.apply("1234");
     assertTrue(uncasted instanceof ConstantIntValue);
@@ -67,17 +65,9 @@ public class ConstantValueTest extends SolrTestCaseJ4 {
     assertEquals("abcdef", ((ConstantStringValue)uncasted).getString());
 
     // Date
-    uncasted = ConstantValue.creatorFunction.apply("1800-01-01T10:30:15.33");
+    uncasted = ConstantValue.creatorFunction.apply("1800-01-01T10:30:15.33Z");
     assertTrue(uncasted instanceof ConstantDateValue);
-    assertEquals(ExtractionDateUtil.parseDate("1800-01-01T10:30:15.33"), ((ConstantDateValue)uncasted).getDate());
-    
-    uncasted = ConstantValue.creatorFunction.apply("1800-01-01T10:30:15.33EST");
-    assertTrue(uncasted instanceof ConstantDateValue);
-    assertEquals(ExtractionDateUtil.parseDate("1800-01-01T10:30:15.33EST"), ((ConstantDateValue)uncasted).getDate());
-    
-    uncasted = ConstantValue.creatorFunction.apply("1800-01-01CDT");
-    assertTrue(uncasted instanceof ConstantDateValue);
-    assertEquals(ExtractionDateUtil.parseDate("1800-01-01CDT"), ((ConstantDateValue)uncasted).getDate());
+    assertEquals(Date.from(Instant.parse("1800-01-01T10:30:15.33Z")), ((ConstantDateValue)uncasted).getDate());
   }
   
   @Test
@@ -316,10 +306,9 @@ public class ConstantValueTest extends SolrTestCaseJ4 {
     });
   }
 
-  public static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ROOT);
   @Test
-  public void constantDateTest() throws ParseException {
-    Date date = dateFormatter.parse("1800-01-01T10:30:15UTC");
+  public void constantDateTest() throws DateTimeParseException {
+    Date date = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
     ConstantDateValue val = new ConstantDateValue(date.getTime());
     
     assertTrue(val.exists());

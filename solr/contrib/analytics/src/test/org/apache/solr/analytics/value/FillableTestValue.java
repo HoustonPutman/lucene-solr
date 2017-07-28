@@ -16,7 +16,8 @@
  */
 package org.apache.solr.analytics.value;
 
-import java.text.ParseException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
@@ -40,7 +41,6 @@ import org.apache.solr.analytics.value.LongValue.AbstractLongValue;
 import org.apache.solr.analytics.value.LongValueStream.AbstractLongValueStream;
 import org.apache.solr.analytics.value.StringValue.AbstractStringValue;
 import org.apache.solr.analytics.value.StringValueStream.AbstractStringValueStream;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 
 public class FillableTestValue {
   public static class TestAnalyticsValue extends AbstractAnalyticsValue {
@@ -503,8 +503,8 @@ public class FillableTestValue {
 
     public TestDateValue setValue(String value) {
       try {
-        this.value = ExtractionDateUtil.parseDate(value).getTime();
-      } catch (ParseException e) {
+        this.value = Instant.parse(value).toEpochMilli();
+      } catch (DateTimeParseException e) {
         this.value = 0;
       }
       return this;
@@ -551,8 +551,8 @@ public class FillableTestValue {
     public void streamLongs(LongConsumer cons) {
       for (int i = 0; i < values.length; ++i) {
         try {
-          cons.accept(ExtractionDateUtil.parseDate(values[i]).getTime());
-        } catch (ParseException e) { }
+          cons.accept(Instant.parse(values[i]).toEpochMilli());
+        } catch (DateTimeParseException e) { }
       }
     }
 

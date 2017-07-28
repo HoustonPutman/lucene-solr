@@ -29,7 +29,6 @@ import org.apache.solr.analytics.value.BooleanValue.AbstractBooleanValue;
  * A mapping function to test if a value.
  * <p>
  * Any {@link AnalyticsValueStream} can be passed in, and a {@link BooleanValue} will be returned representing whether a value exists.
- * </ul>
  */
 public class ExistsFunction {
   public static final String name = "exists";

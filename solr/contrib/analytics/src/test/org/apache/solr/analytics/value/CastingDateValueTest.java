@@ -16,7 +16,8 @@
  */
 package org.apache.solr.analytics.value;
 
-import java.text.ParseException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -25,14 +26,13 @@ import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.analytics.value.AnalyticsValueStream.ExpressionType;
 import org.apache.solr.analytics.value.FillableTestValue.TestDateValue;
 import org.apache.solr.analytics.value.constant.ConstantDateValue;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.junit.Test;
 
 public class CastingDateValueTest extends SolrTestCaseJ4 {
 
   @Test
-  public void dateCastingTest() throws ParseException {
-    Date date = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
+  public void dateCastingTest() throws DateTimeParseException {
+    Date date = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
     TestDateValue val = new TestDateValue();
     
     assertTrue(val instanceof DateValue);
@@ -56,8 +56,8 @@ public class CastingDateValueTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void objectCastingTest() throws ParseException {
-    Date date = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
+  public void objectCastingTest() throws DateTimeParseException {
+    Date date = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
     TestDateValue val = new TestDateValue();
     
     assertTrue(val instanceof AnalyticsValue);
@@ -69,8 +69,8 @@ public class CastingDateValueTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void dateStreamCastingTest() throws ParseException {
-    Date date = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
+  public void dateStreamCastingTest() throws DateTimeParseException {
+    Date date = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
     TestDateValue val = new TestDateValue();
     
     assertTrue(val instanceof DateValueStream);
@@ -116,8 +116,8 @@ public class CastingDateValueTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void objectStreamCastingTest() throws ParseException {
-    Date date = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
+  public void objectStreamCastingTest() throws DateTimeParseException {
+    Date date = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
     TestDateValue val = new TestDateValue();
     
     assertTrue(val instanceof AnalyticsValueStream);
@@ -140,8 +140,8 @@ public class CastingDateValueTest extends SolrTestCaseJ4 {
   }
   
   @Test
-  public void constantConversionTest() throws ParseException {
-    Date date = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
+  public void constantConversionTest() throws DateTimeParseException {
+    Date date = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
     
     TestDateValue val = new TestDateValue(ExpressionType.CONST);
     val.setValue("1800-01-01T10:30:15Z").setExists(true);

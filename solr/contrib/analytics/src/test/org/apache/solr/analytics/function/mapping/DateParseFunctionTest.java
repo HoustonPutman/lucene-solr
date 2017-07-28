@@ -16,7 +16,8 @@
  */
 package org.apache.solr.analytics.function.mapping;
 
-import java.text.ParseException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -29,15 +30,14 @@ import org.apache.solr.analytics.value.FillableTestValue.TestLongValue;
 import org.apache.solr.analytics.value.FillableTestValue.TestLongValueStream;
 import org.apache.solr.analytics.value.FillableTestValue.TestStringValue;
 import org.apache.solr.analytics.value.FillableTestValue.TestStringValueStream;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.junit.Test;
 
 public class DateParseFunctionTest extends SolrTestCaseJ4 {
 
   @Test
-  public void singleValueLongTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1920-04-15T18:15:45Z");
+  public void singleValueLongTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1920-04-15T18:15:45Z"));
     TestLongValue val = new TestLongValue();
 
     AnalyticsValueStream uncasted = DateParseFunction.creatorFunction.apply(new AnalyticsValueStream[] {val});
@@ -66,9 +66,9 @@ public class DateParseFunctionTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void singleValueStringTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1920-04-15T18:15:45Z");
+  public void singleValueStringTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1920-04-15T18:15:45Z"));
     TestStringValue val = new TestStringValue();
 
     AnalyticsValueStream uncasted = DateParseFunction.creatorFunction.apply(new AnalyticsValueStream[] {val});
@@ -117,10 +117,10 @@ public class DateParseFunctionTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void multiValueLongTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1920-04-15T18:15:45Z");
-    Date date3 = ExtractionDateUtil.parseDate("2012-11-30T20:30:15Z");
+  public void multiValueLongTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1920-04-15T18:15:45Z"));
+    Date date3 = Date.from(Instant.parse("2012-11-30T20:30:15Z"));
     TestLongValueStream val = new TestLongValueStream();
     
     AnalyticsValueStream uncasted = DateParseFunction.creatorFunction.apply(new AnalyticsValueStream[] {val});
@@ -168,10 +168,10 @@ public class DateParseFunctionTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void multiValueStringTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1920-04-15T18:15:45Z");
-    Date date3 = ExtractionDateUtil.parseDate("2012-11-30T20:30:15Z");
+  public void multiValueStringTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1920-04-15T18:15:45Z"));
+    Date date3 = Date.from(Instant.parse("2012-11-30T20:30:15Z"));
     TestStringValueStream val = new TestStringValueStream();
     
     AnalyticsValueStream uncasted = DateParseFunction.creatorFunction.apply(new AnalyticsValueStream[] {val});

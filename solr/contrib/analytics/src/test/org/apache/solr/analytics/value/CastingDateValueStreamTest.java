@@ -16,23 +16,23 @@
  */
 package org.apache.solr.analytics.value;
 
-import java.text.ParseException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.analytics.value.FillableTestValue.TestDateValueStream;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.junit.Test;
 
 public class CastingDateValueStreamTest extends SolrTestCaseJ4 {
 
   @Test
-  public void dateStreamCastingTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1920-04-15T18:15:45Z");
-    Date date3 = ExtractionDateUtil.parseDate("2012-11-30T20:30:15Z");
+  public void dateStreamCastingTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1920-04-15T18:15:45Z"));
+    Date date3 = Date.from(Instant.parse("2012-11-30T20:30:15Z"));
     TestDateValueStream val = new TestDateValueStream();
     
     assertTrue(val instanceof DateValueStream);
@@ -78,10 +78,10 @@ public class CastingDateValueStreamTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void objectStreamCastingTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1920-04-15T18:15:45Z");
-    Date date3 = ExtractionDateUtil.parseDate("2012-11-30T20:30:15Z");
+  public void objectStreamCastingTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1800-01-01T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1920-04-15T18:15:45Z"));
+    Date date3 = Date.from(Instant.parse("2012-11-30T20:30:15Z"));
     TestDateValueStream val = new TestDateValueStream();
     
     assertTrue(val instanceof AnalyticsValueStream);

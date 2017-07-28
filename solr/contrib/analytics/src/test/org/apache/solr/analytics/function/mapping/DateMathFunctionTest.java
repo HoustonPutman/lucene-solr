@@ -16,7 +16,8 @@
  */
 package org.apache.solr.analytics.function.mapping;
 
-import java.text.ParseException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -28,15 +29,14 @@ import org.apache.solr.analytics.value.DateValueStream;
 import org.apache.solr.analytics.value.FillableTestValue.TestDateValue;
 import org.apache.solr.analytics.value.FillableTestValue.TestDateValueStream;
 import org.apache.solr.analytics.value.constant.ConstantStringValue;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.junit.Test;
 
 public class DateMathFunctionTest extends SolrTestCaseJ4 {
   
   @Test
-  public void singleValueParameterTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1810-12-02T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1931-03-16T18:15:45Z");
+  public void singleValueParameterTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1810-12-02T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1931-03-16T18:15:45Z"));
     
     TestDateValue val = new TestDateValue();
 
@@ -70,10 +70,10 @@ public class DateMathFunctionTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void multiValueParamaterTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1810-12-02T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1931-03-16T18:15:45Z");
-    Date date3 = ExtractionDateUtil.parseDate("2023-11-01T20:30:15Z");
+  public void multiValueParamaterTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1810-12-02T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1931-03-16T18:15:45Z"));
+    Date date3 = Date.from(Instant.parse("2023-11-01T20:30:15Z"));
     
     TestDateValueStream val = new TestDateValueStream();
 

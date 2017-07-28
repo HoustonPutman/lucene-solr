@@ -16,7 +16,8 @@
  */
 package org.apache.solr.analytics.function.mapping;
 
-import java.text.ParseException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -54,7 +55,6 @@ import org.apache.solr.analytics.value.FillableTestValue.TestLongValue;
 import org.apache.solr.analytics.value.FillableTestValue.TestLongValueStream;
 import org.apache.solr.analytics.value.FillableTestValue.TestStringValue;
 import org.apache.solr.analytics.value.FillableTestValue.TestStringValueStream;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.junit.Test;
 
 public class FillMissingFunctionTest extends SolrTestCaseJ4 {
@@ -254,10 +254,10 @@ public class FillMissingFunctionTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void singleValueDateTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1810-12-02T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1950-02-23T14:54:34Z");
-    Date date3 = ExtractionDateUtil.parseDate("2023-11-01T20:30:15Z");
+  public void singleValueDateTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1810-12-02T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1950-02-23T14:54:34Z"));
+    Date date3 = Date.from(Instant.parse("2023-11-01T20:30:15Z"));
     
     TestDateValue val = new TestDateValue();
     TestDateValue filler = new TestDateValue();
@@ -579,10 +579,10 @@ public class FillMissingFunctionTest extends SolrTestCaseJ4 {
   }
 
   @Test
-  public void multiValueDateTest() throws ParseException {
-    Date date1 = ExtractionDateUtil.parseDate("1810-12-02T10:30:15Z");
-    Date date2 = ExtractionDateUtil.parseDate("1931-03-16T18:15:45Z");
-    Date date3 = ExtractionDateUtil.parseDate("2023-11-01T20:30:15Z");
+  public void multiValueDateTest() throws DateTimeParseException {
+    Date date1 = Date.from(Instant.parse("1810-12-02T10:30:15Z"));
+    Date date2 = Date.from(Instant.parse("1931-03-16T18:15:45Z"));
+    Date date3 = Date.from(Instant.parse("2023-11-01T20:30:15Z"));
     
     TestDateValueStream val = new TestDateValueStream();
     TestDateValueStream filler = new TestDateValueStream();

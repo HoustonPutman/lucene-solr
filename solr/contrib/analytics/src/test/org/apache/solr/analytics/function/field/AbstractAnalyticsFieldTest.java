@@ -17,6 +17,7 @@
 package org.apache.solr.analytics.function.field;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,7 +32,6 @@ import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.analytics.ExpressionFactory;
-import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.Filter;
 import org.apache.solr.search.QueryWrapperFilter;
@@ -192,11 +192,11 @@ public class AbstractAnalyticsFieldTest extends SolrTestCaseJ4 {
       doubles.put(i + 20.5, 1);
       multiDoubles.put(""+i, doubles);
       
-      singleDates.put(""+i, ExtractionDateUtil.parseDate("180" + i + "-12-31T23:59:59Z").getTime());
+      singleDates.put(""+i, Instant.parse("180" + i + "-12-31T23:59:59Z").toEpochMilli());
       Map<Long, Integer> dates = new HashMap<>();
-      dates.put(ExtractionDateUtil.parseDate("180" + i + "-12-31T23:59:59Z").getTime(), 1);
-      dates.put(ExtractionDateUtil.parseDate("18" + ( i + 10 ) + "-12-31T23:59:59Z").getTime(), 2);
-      dates.put(ExtractionDateUtil.parseDate("18" + ( i + 20 ) + "-12-31T23:59:59Z").getTime(), 1);
+      dates.put(Instant.parse("180" + i + "-12-31T23:59:59Z").toEpochMilli(), 1);
+      dates.put(Instant.parse("18" + ( i + 10 ) + "-12-31T23:59:59Z").toEpochMilli(), 2);
+      dates.put(Instant.parse("18" + ( i + 20 ) + "-12-31T23:59:59Z").toEpochMilli(), 1);
       multiDates.put(""+i, dates);
       
       singleStrings.put(""+i, "abc" + i);
