@@ -59,7 +59,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
   
   @BeforeClass
   public static void populate() throws Exception {
-    setupCluster();
+    cleanIndex();
     
     intTestStart = new ArrayList<>();
     longTestStart = new ArrayList<>();
@@ -122,7 +122,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.sr.s.float_fd", "sum(float_fd)",
         "o.sr.s.double_dd", "sum(double_dd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int
@@ -154,7 +154,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.mr.s.float_fd", "mean(float_fd)",
         "o.mr.s.double_dd", "mean(double_dd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int
@@ -186,7 +186,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.str.s.float_fd", "stddev(float_fd)",
         "o.str.s.double_dd", "stddev(double_dd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int
@@ -220,7 +220,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.medr.s.double_dd", "median(double_dd)",
         "o.medr.s.date_dtd", "median(date_dtd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int
@@ -256,7 +256,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.p2r.s.date_dtd", "string(percentile(20,date_dtd))",
         "o.p2r.s.string_sd", "percentile(20,string_sd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int 20
@@ -300,7 +300,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.p6r.s.date_dtd", "string(percentile(60,date_dtd))",
         "o.p6r.s.string_sd", "percentile(60,string_sd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int 60
@@ -344,7 +344,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.mir.s.date_dtd", "string(min(date_dtd))",
         "o.mir.s.string_sd", "min(string_sd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int
@@ -388,7 +388,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.mar.s.date_dtd", "string(max(date_dtd))",
         "o.mar.s.string_sd", "max(string_sd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int
@@ -432,7 +432,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.ur.s.date_dtd", "unique(date_dtd)",
         "o.ur.s.string_sd", "unique(string_sd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int
@@ -476,7 +476,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.cr.s.date_dtd", "count(date_dtd)",
         "o.cr.s.string_sd", "count(string_sd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int
@@ -520,7 +520,7 @@ public class LegacyNoFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
         "o.misr.s.date_dtd", "missing(date_dtd)",
         "o.misr.s.string_sd", "missing(string_sd)"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int

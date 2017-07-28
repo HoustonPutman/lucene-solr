@@ -20,7 +20,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.solr.SolrTestCaseJ4;
+import org.apache.solr.analytics.value.AnalyticsValueStream.ExpressionType;
 import org.apache.solr.analytics.value.FillableTestValue.TestBooleanValue;
+import org.apache.solr.analytics.value.constant.ConstantBooleanValue;
 import org.junit.Test;
 
 public class CastingBooleanValueTest extends SolrTestCaseJ4 {
@@ -124,5 +126,34 @@ public class CastingBooleanValueTest extends SolrTestCaseJ4 {
       assertEquals(values.next(), value);
     });
     assertFalse(values.hasNext());
+  }
+  
+  @Test
+  public void constantConversionTest() {
+    TestBooleanValue val = new TestBooleanValue(ExpressionType.CONST);
+    val.setValue(true).setExists(true);
+    AnalyticsValueStream conv = val.convertToConstant();
+    assertTrue(conv instanceof ConstantBooleanValue);
+    assertEquals(true, ((ConstantBooleanValue)conv).getBoolean());
+
+    val = new TestBooleanValue(ExpressionType.FIELD);
+    val.setValue(true).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestBooleanValue(ExpressionType.UNREDUCED_MAPPING);
+    val.setValue(true).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestBooleanValue(ExpressionType.REDUCTION);
+    val.setValue(true).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestBooleanValue(ExpressionType.REDUCED_MAPPING);
+    val.setValue(true).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
   }
 }

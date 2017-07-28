@@ -44,7 +44,7 @@ public class LegacyFieldFacetExtrasCloudTest extends LegacyAbstractAnalyticsFace
   
   @BeforeClass
   public static void beforeClass() throws Exception {
-    setupCluster();
+    cleanIndex();
 
     //INT
     intLongTestStart = new ArrayList<>();
@@ -134,7 +134,7 @@ public class LegacyFieldFacetExtrasCloudTest extends LegacyAbstractAnalyticsFace
         "o.lr.ff.string_sd.limit", "1"
     };
     
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
 
     Collection<Double> lon = getValueList(response, "lr", "fieldFacets", "long_ld", "mean", false);
@@ -178,7 +178,7 @@ public class LegacyFieldFacetExtrasCloudTest extends LegacyAbstractAnalyticsFace
         "o.off2.ff.long_ld.offset", "4"
     };
     
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
 
     Collection<Double> lon;
@@ -226,26 +226,26 @@ public class LegacyFieldFacetExtrasCloudTest extends LegacyAbstractAnalyticsFace
         "o.sr.ff.string_sd.sd", "desc"
     };
     
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     Collection<Double> lon = getValueList(response, "sr", "fieldFacets", "long_ld", "mean", false);
-    ArrayList<Double> longTest = calculateNumberStat(intLongTestStart, "mean");
+    ArrayList<Double> longTest = calculateFacetedNumberStat(intLongTestStart, "mean");
     Collections.sort(longTest);
     assertEquals(responseStr, longTest,lon);
     
     Collection<Double> flo = getValueList(response, "sr", "fieldFacets", "float_fd", "median", false);
-    ArrayList<Double> floatTest = calculateNumberStat(intFloatTestStart, "median");
+    ArrayList<Double> floatTest = calculateFacetedNumberStat(intFloatTestStart, "median");
     Collections.sort(floatTest,Collections.reverseOrder());
     assertEquals(responseStr, floatTest,flo);
     
     Collection<Long> doub = getValueList(response, "sr", "fieldFacets", "double_dd", "count", false);
-    ArrayList<Long> doubleTest = (ArrayList<Long>)calculateStat(intDoubleTestStart, "count");
+    ArrayList<Long> doubleTest = (ArrayList<Long>)calculateFacetedStat(intDoubleTestStart, "count");
     Collections.sort(doubleTest);
     assertEquals(responseStr, doubleTest,doub);
     
     Collection<Integer> string = getValueList(response, "sr", "fieldFacets", "string_sd", "percentile_20", false);
-    ArrayList<Integer> stringTest = (ArrayList<Integer>)calculateStat(intStringTestStart, "perc_20");
+    ArrayList<Integer> stringTest = (ArrayList<Integer>)calculateFacetedStat(intStringTestStart, "perc_20");
     Collections.sort(stringTest,Collections.reverseOrder());
     assertEquals(responseStr, stringTest,string);
   }

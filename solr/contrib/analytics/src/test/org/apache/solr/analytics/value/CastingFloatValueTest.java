@@ -20,7 +20,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.solr.SolrTestCaseJ4;
+import org.apache.solr.analytics.value.AnalyticsValueStream.ExpressionType;
 import org.apache.solr.analytics.value.FillableTestValue.TestFloatValue;
+import org.apache.solr.analytics.value.constant.ConstantFloatValue;
 import org.junit.Test;
 
 public class CastingFloatValueTest extends SolrTestCaseJ4 {
@@ -163,5 +165,34 @@ public class CastingFloatValueTest extends SolrTestCaseJ4 {
       assertEquals(values.next(), value);
     });
     assertFalse(values.hasNext());
+  }
+  
+  @Test
+  public void constantConversionTest() {
+    TestFloatValue val = new TestFloatValue(ExpressionType.CONST);
+    val.setValue(12354.234F).setExists(true);
+    AnalyticsValueStream conv = val.convertToConstant();
+    assertTrue(conv instanceof ConstantFloatValue);
+    assertEquals(12354.234F, ((ConstantFloatValue)conv).getFloat(), .0000001);
+
+    val = new TestFloatValue(ExpressionType.FIELD);
+    val.setValue(12354.234F).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestFloatValue(ExpressionType.UNREDUCED_MAPPING);
+    val.setValue(12354.234F).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestFloatValue(ExpressionType.REDUCTION);
+    val.setValue(12354.234F).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestFloatValue(ExpressionType.REDUCED_MAPPING);
+    val.setValue(12354.234F).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
   }
 }

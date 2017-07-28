@@ -23,14 +23,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.solr.analytics.AbstractAnalyticsCloudTest;
+import org.apache.solr.analytics.legacy.LegacyAbstractAnalyticsCloudTest;
 import org.apache.solr.analytics.util.AnalyticsResponseHeadings;
 import org.apache.solr.analytics.util.MedianCalculator;
 import org.apache.solr.analytics.util.OrdinalCalculator;
 import org.apache.solr.common.util.NamedList;
 import org.junit.AfterClass;
 
-public class LegacyAbstractAnalyticsFacetCloudTest extends AbstractAnalyticsCloudTest {
+public class LegacyAbstractAnalyticsFacetCloudTest extends LegacyAbstractAnalyticsCloudTest {
   protected static final HashMap<String,Object> defaults = new HashMap<>();
   
   protected String latestType = "";
@@ -78,7 +78,7 @@ public class LegacyAbstractAnalyticsFacetCloudTest extends AbstractAnalyticsClou
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <T extends Number & Comparable<T>> ArrayList calculateNumberStat(ArrayList<ArrayList<T>> lists, String stat) {
+  public <T extends Number & Comparable<T>> ArrayList calculateFacetedNumberStat(ArrayList<ArrayList<T>> lists, String stat) {
     ArrayList result;
     if (stat.equals("median")) {
       result = new ArrayList<Double>();
@@ -131,7 +131,7 @@ public class LegacyAbstractAnalyticsFacetCloudTest extends AbstractAnalyticsClou
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <T extends Comparable<T>> ArrayList calculateStat(ArrayList<ArrayList<T>> lists, String stat) {
+  public <T extends Comparable<T>> ArrayList calculateFacetedStat(ArrayList<ArrayList<T>> lists, String stat) {
     ArrayList result;
     if (stat.contains("perc_")) {
       result = new ArrayList<T>();

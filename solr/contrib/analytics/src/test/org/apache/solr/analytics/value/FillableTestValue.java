@@ -25,6 +25,7 @@ import java.util.function.LongConsumer;
 import org.apache.solr.analytics.util.function.BooleanConsumer;
 import org.apache.solr.analytics.util.function.FloatConsumer;
 import org.apache.solr.analytics.value.AnalyticsValue.AbstractAnalyticsValue;
+import org.apache.solr.analytics.value.AnalyticsValueStream.AbstractAnalyticsValueStream;
 import org.apache.solr.analytics.value.BooleanValue.AbstractBooleanValue;
 import org.apache.solr.analytics.value.BooleanValueStream.AbstractBooleanValueStream;
 import org.apache.solr.analytics.value.DateValue.AbstractDateValue;
@@ -86,7 +87,7 @@ public class FillableTestValue {
     public ExpressionType getExpressionType() { return expressionType; }
   }
   
-  public static class TestAnalyticsValueStream implements AnalyticsValueStream {
+  public static class TestAnalyticsValueStream extends AbstractAnalyticsValueStream {
     private final ExpressionType expressionType;
     
     private Object[] values;

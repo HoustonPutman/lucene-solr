@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.analytics.function.ReductionCollectionManager;
+import org.apache.solr.analytics.value.constant.ConstantValue;
 import org.apache.solr.schema.IndexSchema;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -138,6 +139,21 @@ public class ExpressionFactoryTest extends SolrTestCaseJ4 {
     fact.startGrouping();
     grouped = fact.createExpression("unique(add(int_i,float_f))");
     assertFalse("The objects of the two mapping expressions are the same.", ungrouped == grouped);
+  }
+  
+  @Test
+  public void constantFunctionConversionTest() {
+    ExpressionFactory fact = getExpressionFactory();
+    fact.startRequest();
+
+    assertTrue(fact.createExpression("add(1,2)") instanceof ConstantValue);
+    assertTrue(fact.createExpression("add(1,2,2,3,4)") instanceof ConstantValue);
+    assertTrue(fact.createExpression("add(1)") instanceof ConstantValue);
+    assertTrue(fact.createExpression("concat(add(1,2), ' is a number')") instanceof ConstantValue);
+
+    assertFalse(fact.createExpression("sum(add(1,2))") instanceof ConstantValue);
+    assertFalse(fact.createExpression("sum(int_i)") instanceof ConstantValue);
+    assertFalse(fact.createExpression("sub(1,long_l)") instanceof ConstantValue);
   }
   
   public void testReductionManager(ReductionCollectionManager manager, boolean hasExpressions, String... fields) {

@@ -16,17 +16,48 @@
  */
 package org.apache.solr.analytics.legacy;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
-import org.apache.solr.analytics.AbstractAnalyticsCloudTest;
 import org.apache.solr.analytics.util.AnalyticsResponseHeadings;
 import org.apache.solr.analytics.util.MedianCalculator;
 import org.apache.solr.analytics.util.OrdinalCalculator;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.request.CollectionAdminRequest;
+import org.apache.solr.client.solrj.request.QueryRequest;
+import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.cloud.AbstractDistribZkTestBase;
+import org.apache.solr.cloud.SolrCloudTestCase;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.junit.BeforeClass;
 
-public abstract class LegacyAbstractAnalyticsCloudTest extends AbstractAnalyticsCloudTest {
+public abstract class LegacyAbstractAnalyticsCloudTest extends SolrCloudTestCase {
+  
+  protected static final String COLLECTIONORALIAS = "collection1";
+  protected static final int TIMEOUT = DEFAULT_TIMEOUT;
+  protected static final String id = "id";
+
+  @BeforeClass
+  public static void setupCollection() throws Exception {
+    configureCluster(4)
+        .addConfig("conf", configset("cloud-analytics"))
+        .configure();
+
+    CollectionAdminRequest.createCollection(COLLECTIONORALIAS, "conf", 2, 1).process(cluster.getSolrClient());
+    AbstractDistribZkTestBase.waitForRecoveriesToFinish(COLLECTIONORALIAS, cluster.getSolrClient().getZkStateReader(),
+        false, true, TIMEOUT);
+    cleanIndex();
+  }
+
+  public static void cleanIndex() throws Exception {
+    new UpdateRequest()
+        .deleteByQuery("*:*")
+        .commit(cluster.getSolrClient(), COLLECTIONORALIAS);
+  }
   
   protected static final String[] BASEPARMS = new String[]{ "q", "*:*", "indent", "true", "olap", "true", "rows", "0" };
 
@@ -48,6 +79,21 @@ public abstract class LegacyAbstractAnalyticsCloudTest extends AbstractAnalytics
     public String toString() {
       return text;
     }
+  }
+
+  protected NamedList<Object> queryLegacyCloudAnalytics(String[] testParams) throws SolrServerException, IOException, InterruptedException {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set("q", "*:*");
+    params.set("indent", "true");
+    params.set("olap", "true");
+    params.set("rows", "0");
+    for (int i = 0; i + 1 < testParams.length;) {
+      params.add(testParams[i++], testParams[i++]);
+    }
+    cluster.waitForAllNodes(10000);
+    QueryRequest qreq = new QueryRequest(params);
+    QueryResponse resp = qreq.process(cluster.getSolrClient(), COLLECTIONORALIAS);
+    return resp.getResponse();
   }
   
   @SuppressWarnings("unchecked")

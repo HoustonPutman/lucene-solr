@@ -17,113 +17,92 @@
 package org.apache.solr.analytics.function.field;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.solr.analytics.ExpressionFactory;
 import org.junit.Test;
 
 public class IntFieldsTest extends AbstractAnalyticsFieldTest {
+  
+  @Test
+  public void expressionFactoryCreationTest() {
+    ExpressionFactory fact = getExpressionFactory();
+
+    assertTrue(fact.createExpression("int_i_t") instanceof IntField);
+    assertTrue(fact.createExpression("int_i_p") instanceof IntField);
+    assertTrue(fact.createExpression("int_im_t") instanceof IntMultiTrieField);
+    assertTrue(fact.createExpression("int_im_p") instanceof IntMultiPointField);
+  }
 
   @Test
   public void singleValuedTrieIntTest() throws IOException {
     IntField valueField = new IntField("int_i_t");
-    Set<Integer> values = new HashSet<>();
-    values.add(0);
-    values.add(1);
-    values.add(2);
-    values.add(3);
-    values.add(4);
+    Map<String,Integer> values = new HashMap<>();
     
-    emptyValueFound = false;
-    
-    testFieldValues(valueField, () -> {
+    Set<String> missing = collectFieldValues(valueField, id -> {
       int value = valueField.getInt();
       if (valueField.exists()) {
-        assertTrue("Incorrect or duplicate value found", values.remove(value));
-      } else {
-        assertFalse("Multiple missing values found", emptyValueFound);
-        emptyValueFound = true;
+        values.put(id, value);
       }
+      return valueField.exists();
     });
-    assertTrue("Missing value not found", emptyValueFound);
-    assertEquals("Not all values found", 0, values.size());
+    
+    checkSingleFieldValues(singleInts, values, missing);
   }
 
   @Test
   public void singleValuedPointIntTest() throws IOException {
     IntField valueField = new IntField("int_i_p");
-    Set<Integer> values = new HashSet<>();
-    values.add(0);
-    values.add(1);
-    values.add(2);
-    values.add(3);
-    values.add(4);
+    Map<String,Integer> values = new HashMap<>();
     
-    emptyValueFound = false;
-    
-    testFieldValues(valueField, () -> {
+    Set<String> missing = collectFieldValues(valueField, id -> {
       int value = valueField.getInt();
       if (valueField.exists()) {
-        assertTrue("Incorrect or duplicate value found", values.remove(value));
-      } else {
-        assertFalse("Multiple missing values found", emptyValueFound);
-        emptyValueFound = true;
+        values.put(id, value);
       }
+      return valueField.exists();
     });
-    assertTrue("Missing value not found", emptyValueFound);
-    assertEquals("Not all values found", 0, values.size());
+    
+    checkSingleFieldValues(singleInts, values, missing);
   }
 
-  /*@Test
+  @Test
   public void multiValuedTrieIntTest() throws IOException {
-    IntField valueField = new IntField("int_im_t");
-    Set<Set<Integer>> values = new HashSet<>();
-    Set<Integer> documentValues = new HashSet<>();
-    documentValues.add(0);
-    documentValues.add(10);
-    documentValues.add(20);
-    values.add(2);
-    values.add(3);
-    values.add(4);
+    IntMultiTrieField valueField = new IntMultiTrieField("int_im_t");
+    Map<String,Map<Integer,Integer>> values = new HashMap<>();
     
-    emptyValueFound = false;
-    
-    testFieldValues(valueField, () -> {
-      Set<Integer> foundValues = new HashSet<>();
-      valueField.streamInts(value -> foundValues.add(value));
-      if (foundValues.size() > 0) {
-        assertTrue("Incorrect or duplicate value found", values.remove(foundValues));
-      } else {
-        assertFalse("Multiple missing values found", emptyValueFound);
-        emptyValueFound = true;
+    Set<String> missing = collectFieldValues(valueField, id -> {
+      Map<Integer, Integer> doc = new HashMap<>();
+      valueField.streamInts( value -> {
+        doc.put(value, doc.getOrDefault(value, 0) + 1);
+      });
+      if (doc.size() > 0) {
+        values.put(id, doc);
       }
+      return doc.size() > 0;
     });
-    assertTrue("Missing value not found", emptyValueFound);
-    assertEquals("Not all values found", 0, values.size());
+    
+    checkMultiFieldValues(multiInts, values, missing, true);
   }
 
   @Test
   public void multiValuedPointIntTest() throws IOException {
-    IntField valueField = new IntField("int_im_p");
-    Set<Integer> values = new HashSet<>();
-    values.add(0);
-    values.add(1);
-    values.add(2);
-    values.add(3);
-    values.add(4);
+    IntMultiPointField valueField = new IntMultiPointField("int_im_p");
+    Map<String,Map<Integer,Integer>> values = new HashMap<>();
     
-    emptyValueFound = false;
-    
-    testFieldValues(valueField, () -> {
-      int value = valueField.getInt();
-      if (valueField.exists()) {
-        assertTrue("Incorrect or duplicate value found", values.remove(value));
-      } else {
-        assertFalse("Multiple missing values found", emptyValueFound);
-        emptyValueFound = true;
+    Set<String> missing = collectFieldValues(valueField, id -> {
+      Map<Integer, Integer> doc = new HashMap<>();
+      valueField.streamInts( value -> {
+        doc.put(value, doc.getOrDefault(value, 0) + 1);
+      });
+      if (doc.size() > 0) {
+        values.put(id, doc);
       }
+      return doc.size() > 0;
     });
-    assertTrue("Missing value not found", emptyValueFound);
-    assertEquals("Not all values found", 0, values.size());
-  }*/
+    
+    checkMultiFieldValues(multiInts, values, missing, false);
+  }
 }

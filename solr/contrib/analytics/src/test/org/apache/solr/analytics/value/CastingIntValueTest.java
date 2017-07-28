@@ -20,7 +20,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.solr.SolrTestCaseJ4;
+import org.apache.solr.analytics.value.AnalyticsValueStream.ExpressionType;
 import org.apache.solr.analytics.value.FillableTestValue.TestIntValue;
+import org.apache.solr.analytics.value.constant.ConstantIntValue;
 import org.junit.Test;
 
 public class CastingIntValueTest extends SolrTestCaseJ4 {
@@ -241,5 +243,34 @@ public class CastingIntValueTest extends SolrTestCaseJ4 {
       assertEquals(values.next(), value);
     });
     assertFalse(values.hasNext());
+  }
+  
+  @Test
+  public void constantConversionTest() {
+    TestIntValue val = new TestIntValue(ExpressionType.CONST);
+    val.setValue(1234).setExists(true);
+    AnalyticsValueStream conv = val.convertToConstant();
+    assertTrue(conv instanceof ConstantIntValue);
+    assertEquals(1234, ((ConstantIntValue)conv).getInt());
+
+    val = new TestIntValue(ExpressionType.FIELD);
+    val.setValue(1234).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestIntValue(ExpressionType.UNREDUCED_MAPPING);
+    val.setValue(1234).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestIntValue(ExpressionType.REDUCTION);
+    val.setValue(1234).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestIntValue(ExpressionType.REDUCED_MAPPING);
+    val.setValue(1234).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
   }
 }

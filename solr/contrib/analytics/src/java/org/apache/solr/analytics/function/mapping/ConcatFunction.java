@@ -27,6 +27,7 @@ import org.apache.solr.analytics.value.AnalyticsValueStream;
 import org.apache.solr.analytics.value.StringValue;
 import org.apache.solr.analytics.value.StringValueStream;
 import org.apache.solr.analytics.value.constant.ConstantStringValue;
+import org.apache.solr.analytics.value.constant.ConstantValue;
 
 /**
  * A concatenation mapping function, combining the string values of the given parameters. (At least 1 parameter is required)
@@ -68,10 +69,10 @@ public class ConcatFunction {
     public static final CreatorFunction creatorFunction = (params -> {
       if (params.length < 2) {
         throw new SolrException(ErrorCode.BAD_REQUEST,"The "+name+" function requires at least 2 parameters.");
-      } else if (!(params[0] instanceof ConstantStringValue)) {
+      } else if (!(params[0] instanceof StringValue && params[0] instanceof ConstantValue)) {
         throw new SolrException(ErrorCode.BAD_REQUEST,"The "+name+" function requires that the first parameter to be a constant string.");
       }
-      final String sep = ((ConstantStringValue)params[0]).getString();
+      final String sep = ((StringValue)params[0]).getString();
       String uniqueName = name + "(" + sep + ")";
       return createConcatFunction(name, uniqueName, (a,b) -> a + sep + b, Arrays.copyOfRange(params, 1, params.length));
     });

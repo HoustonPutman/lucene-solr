@@ -41,7 +41,7 @@ public class LegacyQueryFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    setupCluster();
+    cleanIndex();
     
     //INT
     int1TestStart.add(new ArrayList<Integer>());
@@ -133,26 +133,26 @@ public class LegacyQueryFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.fr.qf.lad.q", "double_dd:[* TO 50]"
     };
     
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int One
     ArrayList<Double> int1 = getValueList(response, "ir", "queryFacets", "float1", "sum", false);
-    ArrayList<Double> int1Test = calculateNumberStat(int1TestStart, "sum");
+    ArrayList<Double> int1Test = calculateFacetedNumberStat(int1TestStart, "sum");
     assertEquals(responseStr, int1, int1Test);
     //Int Two
     ArrayList<Integer> int2 = getValueList(response, "ir", "queryFacets", "float2", "percentile_8", false);
-    ArrayList<Integer> int2Test = (ArrayList<Integer>)calculateStat(int2TestStart, "perc_8");
+    ArrayList<Integer> int2Test = (ArrayList<Integer>)calculateFacetedStat(int2TestStart, "perc_8");
     assertEquals(responseStr, int2, int2Test);
 
     //Long
     ArrayList<Double> long1 = getValueList(response, "lr", "queryFacets", "string", "median", false);
-    ArrayList<Double> long1Test = calculateNumberStat(longTestStart, "median");
+    ArrayList<Double> long1Test = calculateFacetedNumberStat(longTestStart, "median");
     assertEquals(responseStr,long1,long1Test);
 
     //Float
     ArrayList<Double> float1 = getValueList(response, "fr", "queryFacets", "lad", "mean", false);
-    ArrayList<Double> float1Test = calculateNumberStat(floatTestStart, "mean");
+    ArrayList<Double> float1Test = calculateFacetedNumberStat(floatTestStart, "mean");
     assertEquals(responseStr, float1, float1Test);
   }
 

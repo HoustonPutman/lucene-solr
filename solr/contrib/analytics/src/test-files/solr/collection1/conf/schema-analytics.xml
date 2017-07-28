@@ -25,7 +25,7 @@
 
   -->
 
-<schema name="schema-analytics" version="1.0">
+<schema name="schema-analytics" version="1.6">
 
 
   <!-- field type definitions... note that the "name" attribute is

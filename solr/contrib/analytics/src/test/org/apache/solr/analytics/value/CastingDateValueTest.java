@@ -22,7 +22,9 @@ import java.util.Date;
 import java.util.Iterator;
 
 import org.apache.solr.SolrTestCaseJ4;
+import org.apache.solr.analytics.value.AnalyticsValueStream.ExpressionType;
 import org.apache.solr.analytics.value.FillableTestValue.TestDateValue;
+import org.apache.solr.analytics.value.constant.ConstantDateValue;
 import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.junit.Test;
 
@@ -135,5 +137,36 @@ public class CastingDateValueTest extends SolrTestCaseJ4 {
       assertEquals(values.next(), value);
     });
     assertFalse(values.hasNext());
+  }
+  
+  @Test
+  public void constantConversionTest() throws ParseException {
+    Date date = ExtractionDateUtil.parseDate("1800-01-01T10:30:15Z");
+    
+    TestDateValue val = new TestDateValue(ExpressionType.CONST);
+    val.setValue("1800-01-01T10:30:15Z").setExists(true);
+    AnalyticsValueStream conv = val.convertToConstant();
+    assertTrue(conv instanceof ConstantDateValue);
+    assertEquals(date, ((ConstantDateValue)conv).getDate());
+
+    val = new TestDateValue(ExpressionType.FIELD);
+    val.setValue("1800-01-01T10:30:15Z").setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestDateValue(ExpressionType.UNREDUCED_MAPPING);
+    val.setValue("1800-01-01T10:30:15Z").setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestDateValue(ExpressionType.REDUCTION);
+    val.setValue("1800-01-01T10:30:15Z").setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestDateValue(ExpressionType.REDUCED_MAPPING);
+    val.setValue("1800-01-01T10:30:15Z").setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
   }
 }

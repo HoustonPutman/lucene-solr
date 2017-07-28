@@ -58,5 +58,9 @@ public interface DateValueStream extends LongValueStream {
     public void streamObjects(Consumer<Object> cons) {
       streamDates((Date val) -> cons.accept(val));
     }
+    @Override
+    public AnalyticsValueStream convertToConstant() {
+      return this;
+    }
   }
 }

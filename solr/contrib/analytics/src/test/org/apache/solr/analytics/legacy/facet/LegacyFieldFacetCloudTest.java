@@ -87,7 +87,7 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
   
   @BeforeClass
   public static void beforeClass() throws Exception {
-    setupCluster();
+    cleanIndex();
 
     //INT
     intDateTestStart = new ArrayList<>();
@@ -411,43 +411,43 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.sum.ff", "string_sd",
         "o.sum.ff", "date_dtd"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
 
     //Int Date
     Collection<Double> intDate = getValueList(response, "sum", "fieldFacets", "date_dtd", "int", false);
-    ArrayList<Double> intDateTest = calculateNumberStat(intDateTestStart, "sum");
+    ArrayList<Double> intDateTest = calculateFacetedNumberStat(intDateTestStart, "sum");
     assertEquals(responseStr.toString(),intDate,intDateTest);
     //Int String
     Collection<Double> intString = getValueList(response, "sum", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Double> intStringTest = calculateNumberStat(intStringTestStart, "sum");
+    ArrayList<Double> intStringTest = calculateFacetedNumberStat(intStringTestStart, "sum");
     assertEquals(responseStr,intString,intStringTest);
 
     //Long Date
     Collection<Double> longDate = getValueList(response, "sum", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Double> longDateTest = calculateNumberStat(longDateTestStart, "sum");
+    ArrayList<Double> longDateTest = calculateFacetedNumberStat(longDateTestStart, "sum");
     assertEquals(responseStr,longDate,longDateTest);
     //Long String
     Collection<Double> longString = getValueList(response, "sum", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Double> longStringTest = calculateNumberStat(longStringTestStart, "sum");
+    ArrayList<Double> longStringTest = calculateFacetedNumberStat(longStringTestStart, "sum");
     assertEquals(responseStr,longString,longStringTest);
 
     //Float Date
     Collection<Double> floatDate = getValueList(response, "sum", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Double> floatDateTest = calculateNumberStat(floatDateTestStart, "sum");
+    ArrayList<Double> floatDateTest = calculateFacetedNumberStat(floatDateTestStart, "sum");
     assertEquals(responseStr,floatDate,floatDateTest);
     //Float String
     Collection<Double> floatString = getValueList(response, "sum", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Double> floatStringTest = calculateNumberStat(floatStringTestStart, "sum");
+    ArrayList<Double> floatStringTest = calculateFacetedNumberStat(floatStringTestStart, "sum");
     assertEquals(responseStr,floatString,floatStringTest);
 
     //Double Date
     Collection<Double> doubleDate = getValueList(response, "sum", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Double> doubleDateTest = calculateNumberStat(doubleDateTestStart, "sum");
+    ArrayList<Double> doubleDateTest = calculateFacetedNumberStat(doubleDateTestStart, "sum");
     assertEquals(responseStr,doubleDate,doubleDateTest);
     //Double String
     Collection<Double> doubleString = getValueList(response, "sum", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Double> doubleStringTest = calculateNumberStat(doubleStringTestStart, "sum");
+    ArrayList<Double> doubleStringTest = calculateFacetedNumberStat(doubleStringTestStart, "sum");
     assertEquals(responseStr,doubleString,doubleStringTest);
   }
 
@@ -462,43 +462,43 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.mean.ff", "string_sd",
         "o.mean.ff", "date_dtd"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Date
     Collection<Double> intDate = getValueList(response, "mean", "fieldFacets", "date_dtd", "int", false);
-    ArrayList<Double> intDateTest = calculateNumberStat(intDateTestStart, "mean");
+    ArrayList<Double> intDateTest = calculateFacetedNumberStat(intDateTestStart, "mean");
     assertEquals(responseStr,intDate,intDateTest);
     //Int String
     Collection<Double> intString = getValueList(response, "mean", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Double> intStringTest = calculateNumberStat(intStringTestStart, "mean");
+    ArrayList<Double> intStringTest = calculateFacetedNumberStat(intStringTestStart, "mean");
     assertEquals(responseStr,intString,intStringTest);
 
     //Long Date
     Collection<Double> longDate = getValueList(response, "mean", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Double> longDateTest = calculateNumberStat(longDateTestStart, "mean");
+    ArrayList<Double> longDateTest = calculateFacetedNumberStat(longDateTestStart, "mean");
     assertEquals(responseStr,longDate,longDateTest);
     //Long String
     Collection<Double> longString = getValueList(response, "mean", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Double> longStringTest = calculateNumberStat(longStringTestStart, "mean");
+    ArrayList<Double> longStringTest = calculateFacetedNumberStat(longStringTestStart, "mean");
     assertEquals(responseStr,longString,longStringTest);
 
     //Float Date
     Collection<Double> floatDate = getValueList(response, "mean", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Double> floatDateTest = calculateNumberStat(floatDateTestStart, "mean");
+    ArrayList<Double> floatDateTest = calculateFacetedNumberStat(floatDateTestStart, "mean");
     assertEquals(responseStr,floatDate,floatDateTest);
     //Float String
     Collection<Double> floatString = getValueList(response, "mean", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Double> floatStringTest = calculateNumberStat(floatStringTestStart, "mean");
+    ArrayList<Double> floatStringTest = calculateFacetedNumberStat(floatStringTestStart, "mean");
     assertEquals(responseStr,floatString,floatStringTest);
 
     //Double Date
     Collection<Double> doubleDate = getValueList(response, "mean", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Double> doubleDateTest = calculateNumberStat(doubleDateTestStart, "mean");
+    ArrayList<Double> doubleDateTest = calculateFacetedNumberStat(doubleDateTestStart, "mean");
     assertEquals(responseStr,doubleDate,doubleDateTest);
     //Double String
     Collection<Double> doubleString = getValueList(response, "mean", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Double> doubleStringTest = calculateNumberStat(doubleStringTestStart, "mean");
+    ArrayList<Double> doubleStringTest = calculateFacetedNumberStat(doubleStringTestStart, "mean");
     assertEquals(responseStr,doubleString,doubleStringTest);
   }
   
@@ -513,42 +513,42 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.stddev.ff", "string_sd",
         "o.stddev.ff", "date_dtd"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     
     //Int Date
     ArrayList<Double> intDate = getValueList(response, "stddev", "fieldFacets", "date_dtd", "int", false);
-    ArrayList<Double> intDateTest = calculateNumberStat(intDateTestStart, "stddev");
+    ArrayList<Double> intDateTest = calculateFacetedNumberStat(intDateTestStart, "stddev");
     checkStddevs(response, intDate, intDateTest);
     //Int String
     ArrayList<Double> intString = getValueList(response, "stddev", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Double> intStringTest = calculateNumberStat(intStringTestStart, "stddev");
+    ArrayList<Double> intStringTest = calculateFacetedNumberStat(intStringTestStart, "stddev");
     checkStddevs(response, intString, intStringTest);
 
     //Long Date
     ArrayList<Double> longDate = getValueList(response, "stddev", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Double> longDateTest = calculateNumberStat(longDateTestStart, "stddev");
+    ArrayList<Double> longDateTest = calculateFacetedNumberStat(longDateTestStart, "stddev");
     checkStddevs(response, longDate, longDateTest);
     //Long String
     ArrayList<Double> longString = getValueList(response, "stddev", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Double> longStringTest = calculateNumberStat(longStringTestStart, "stddev");
+    ArrayList<Double> longStringTest = calculateFacetedNumberStat(longStringTestStart, "stddev");
     checkStddevs(response, longString, longStringTest);
 
     //Float Date
     ArrayList<Double> floatDate = getValueList(response, "stddev", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Double> floatDateTest = calculateNumberStat(floatDateTestStart, "stddev");
+    ArrayList<Double> floatDateTest = calculateFacetedNumberStat(floatDateTestStart, "stddev");
     checkStddevs(response, floatDate, floatDateTest);
     //Float String
     ArrayList<Double> floatString = getValueList(response, "stddev", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Double> floatStringTest = calculateNumberStat(floatStringTestStart, "stddev");
+    ArrayList<Double> floatStringTest = calculateFacetedNumberStat(floatStringTestStart, "stddev");
     checkStddevs(response, floatString, floatStringTest);
 
     //Double Date
     ArrayList<Double> doubleDate = getValueList(response, "stddev", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Double> doubleDateTest = calculateNumberStat(doubleDateTestStart, "stddev");
+    ArrayList<Double> doubleDateTest = calculateFacetedNumberStat(doubleDateTestStart, "stddev");
     checkStddevs(response, doubleDate, doubleDateTest);
     //Double String
     ArrayList<Double> doubleString = getValueList(response, "stddev", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Double> doubleStringTest = calculateNumberStat(doubleStringTestStart, "stddev");
+    ArrayList<Double> doubleStringTest = calculateFacetedNumberStat(doubleStringTestStart, "stddev");
     checkStddevs(response, doubleString, doubleStringTest);
   }
   
@@ -563,43 +563,43 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.median.ff", "string_sd",
         "o.median.ff", "date_dtd"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Date
     Collection<Double> intDate = getValueList(response, "median","fieldFacets", "date_dtd", "int", false);
-    ArrayList<Double> intDateTest = calculateNumberStat(intDateTestStart, "median");
+    ArrayList<Double> intDateTest = calculateFacetedNumberStat(intDateTestStart, "median");
     assertEquals(responseStr,intDate,intDateTest);
     //Int String
     Collection<Double> intString = getValueList(response, "median", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Double> intStringTest = calculateNumberStat(intStringTestStart, "median");
+    ArrayList<Double> intStringTest = calculateFacetedNumberStat(intStringTestStart, "median");
     assertEquals(responseStr,intString,intStringTest);
 
     //Long Date
     Collection<Double> longDate = getValueList(response, "median", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Double> longDateTest = calculateNumberStat(longDateTestStart, "median");
+    ArrayList<Double> longDateTest = calculateFacetedNumberStat(longDateTestStart, "median");
     assertEquals(responseStr,longDate,longDateTest);
     //Long String
     Collection<Double> longString = getValueList(response, "median", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Double> longStringTest = calculateNumberStat(longStringTestStart, "median");
+    ArrayList<Double> longStringTest = calculateFacetedNumberStat(longStringTestStart, "median");
     assertEquals(responseStr,longString,longStringTest);
 
     //Float Date
     Collection<Double> floatDate = getValueList(response, "median", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Double> floatDateTest = calculateNumberStat(floatDateTestStart, "median");
+    ArrayList<Double> floatDateTest = calculateFacetedNumberStat(floatDateTestStart, "median");
     assertEquals(responseStr,floatDate,floatDateTest);
     //Float String
     Collection<Double> floatString = getValueList(response, "median", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Double> floatStringTest = calculateNumberStat(floatStringTestStart, "median");
+    ArrayList<Double> floatStringTest = calculateFacetedNumberStat(floatStringTestStart, "median");
     assertEquals(responseStr,floatString,floatStringTest);
 
     //Double Date
     Collection<Double> doubleDate = getValueList(response, "median", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Double> doubleDateTest = calculateNumberStat(doubleDateTestStart, "median");
+    ArrayList<Double> doubleDateTest = calculateFacetedNumberStat(doubleDateTestStart, "median");
     assertEquals(responseStr,doubleDate,doubleDateTest);
     //Double String
     Collection<Double> doubleString = getValueList(response, "median", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Double> doubleStringTest = calculateNumberStat(doubleStringTestStart, "median");
+    ArrayList<Double> doubleStringTest = calculateFacetedNumberStat(doubleStringTestStart, "median");
     assertEquals(responseStr,doubleString,doubleStringTest);
   }
 
@@ -619,61 +619,61 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.percentile_20.ff", "int_id",
         "o.percentile_20.ff", "long_ld"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Date
     Collection<Integer> intDate = getValueList(response, "percentile_20n", "fieldFacets", "date_dtd", "int", false);
-    ArrayList<Integer> intDateTest = (ArrayList<Integer>)calculateStat(intDateTestStart, "perc_20");
+    ArrayList<Integer> intDateTest = (ArrayList<Integer>)calculateFacetedStat(intDateTestStart, "perc_20");
     assertEquals(responseStr,intDate,intDateTest);
     //Int String
     Collection<Integer> intString = getValueList(response, "percentile_20n", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Integer> intStringTest = (ArrayList<Integer>)calculateStat(intStringTestStart, "perc_20");
+    ArrayList<Integer> intStringTest = (ArrayList<Integer>)calculateFacetedStat(intStringTestStart, "perc_20");
     assertEquals(responseStr,intString,intStringTest);
 
     //Long Date
     Collection<Long> longDate = getValueList(response, "percentile_20n", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateStat(longDateTestStart, "perc_20");
+    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateFacetedStat(longDateTestStart, "perc_20");
     assertEquals(responseStr,longDate,longDateTest);
     //Long String
     Collection<Long> longString = getValueList(response, "percentile_20n", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateStat(longStringTestStart, "perc_20");
+    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateFacetedStat(longStringTestStart, "perc_20");
     assertEquals(responseStr,longString,longStringTest);
 
     //Float Date
     Collection<Float> floatDate = getValueList(response, "percentile_20n", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Float> floatDateTest = (ArrayList<Float>)calculateStat(floatDateTestStart, "perc_20");
+    ArrayList<Float> floatDateTest = (ArrayList<Float>)calculateFacetedStat(floatDateTestStart, "perc_20");
     assertEquals(responseStr,floatDate,floatDateTest);
     //Float String
     Collection<Float> floatString = getValueList(response, "percentile_20n", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Float> floatStringTest = (ArrayList<Float>)calculateStat(floatStringTestStart, "perc_20");
+    ArrayList<Float> floatStringTest = (ArrayList<Float>)calculateFacetedStat(floatStringTestStart, "perc_20");
     assertEquals(responseStr,floatString,floatStringTest);
 
     //Double Date
     Collection<Double> doubleDate = getValueList(response, "percentile_20n", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Double> doubleDateTest = (ArrayList<Double>)calculateStat(doubleDateTestStart, "perc_20");
+    ArrayList<Double> doubleDateTest = (ArrayList<Double>)calculateFacetedStat(doubleDateTestStart, "perc_20");
     assertEquals(responseStr,doubleDate,doubleDateTest);
     //Double String
     Collection<Double> doubleString = getValueList(response, "percentile_20n", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Double> doubleStringTest = (ArrayList<Double>)calculateStat(doubleStringTestStart, "perc_20");
+    ArrayList<Double> doubleStringTest = (ArrayList<Double>)calculateFacetedStat(doubleStringTestStart, "perc_20");
     assertEquals(responseStr,doubleString,doubleStringTest);
 
     //Date Int
     Collection<String> dateInt = getValueList(response, "percentile_20", "fieldFacets", "int_id", "date", false);
-    ArrayList<String> dateIntTest = (ArrayList<String>)calculateStat(dateIntTestStart, "perc_20");
+    ArrayList<String> dateIntTest = (ArrayList<String>)calculateFacetedStat(dateIntTestStart, "perc_20");
     assertEquals(responseStr,dateInt,dateIntTest);
     //Date Long
     Collection<String> dateString = getValueList(response, "percentile_20", "fieldFacets", "long_ld", "date", false);
-    ArrayList<String> dateLongTest = (ArrayList<String>)calculateStat(dateLongTestStart, "perc_20");
+    ArrayList<String> dateLongTest = (ArrayList<String>)calculateFacetedStat(dateLongTestStart, "perc_20");
     assertEquals(responseStr,dateString,dateLongTest);
 
     //String Int
     Collection<String> stringInt = getValueList(response, "percentile_20", "fieldFacets", "int_id", "str", false);
-    ArrayList<String> stringIntTest = (ArrayList<String>)calculateStat(stringIntTestStart, "perc_20");
+    ArrayList<String> stringIntTest = (ArrayList<String>)calculateFacetedStat(stringIntTestStart, "perc_20");
     assertEquals(responseStr,stringInt,stringIntTest);
     //String Long
     Collection<String> stringLong = getValueList(response, "percentile_20", "fieldFacets", "long_ld", "str", false);
-    ArrayList<String> stringLongTest = (ArrayList<String>)calculateStat(stringLongTestStart, "perc_20");
+    ArrayList<String> stringLongTest = (ArrayList<String>)calculateFacetedStat(stringLongTestStart, "perc_20");
     assertEquals(responseStr,stringLong,stringLongTest);
   }
 
@@ -693,61 +693,61 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.percentile_60.ff", "int_id",
         "o.percentile_60.ff", "long_ld"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Date
     Collection<Integer> intDate = getValueList(response, "percentile_60n", "fieldFacets", "date_dtd", "int", false);
-    ArrayList<Integer> intDateTest = (ArrayList<Integer>)calculateStat(intDateTestStart, "perc_60");
+    ArrayList<Integer> intDateTest = (ArrayList<Integer>)calculateFacetedStat(intDateTestStart, "perc_60");
     assertEquals(responseStr,intDate,intDateTest);
     //Int String
     Collection<Integer> intString = getValueList(response, "percentile_60n", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Integer> intStringTest = (ArrayList<Integer>)calculateStat(intStringTestStart, "perc_60");
+    ArrayList<Integer> intStringTest = (ArrayList<Integer>)calculateFacetedStat(intStringTestStart, "perc_60");
     assertEquals(responseStr,intString,intStringTest);
 
     //Long Date
     Collection<Long> longDate = getValueList(response, "percentile_60n", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateStat(longDateTestStart, "perc_60");
+    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateFacetedStat(longDateTestStart, "perc_60");
     assertEquals(responseStr,longDate,longDateTest);
     //Long String
     Collection<Long> longString = getValueList(response, "percentile_60n", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateStat(longStringTestStart, "perc_60");
+    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateFacetedStat(longStringTestStart, "perc_60");
     assertEquals(responseStr,longString,longStringTest);
 
     //Float Date
     Collection<Float> floatDate = getValueList(response, "percentile_60n", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Float> floatDateTest = (ArrayList<Float>)calculateStat(floatDateTestStart, "perc_60");
+    ArrayList<Float> floatDateTest = (ArrayList<Float>)calculateFacetedStat(floatDateTestStart, "perc_60");
     assertEquals(responseStr,floatDate,floatDateTest);
     //Float String
     Collection<Float> floatString = getValueList(response, "percentile_60n", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Float> floatStringTest = (ArrayList<Float>)calculateStat(floatStringTestStart, "perc_60");
+    ArrayList<Float> floatStringTest = (ArrayList<Float>)calculateFacetedStat(floatStringTestStart, "perc_60");
     assertEquals(responseStr,floatString,floatStringTest);
 
     //Double Date
     Collection<Double> doubleDate = getValueList(response, "percentile_60n", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Double> doubleDateTest = (ArrayList<Double>)calculateStat(doubleDateTestStart, "perc_60");
+    ArrayList<Double> doubleDateTest = (ArrayList<Double>)calculateFacetedStat(doubleDateTestStart, "perc_60");
     assertEquals(responseStr,doubleDate,doubleDateTest);
     //Double String
     Collection<Double> doubleString = getValueList(response, "percentile_60n", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Double> doubleStringTest = (ArrayList<Double>)calculateStat(doubleStringTestStart, "perc_60");
+    ArrayList<Double> doubleStringTest = (ArrayList<Double>)calculateFacetedStat(doubleStringTestStart, "perc_60");
     assertEquals(responseStr,doubleString,doubleStringTest);
 
     //Date Int
     Collection<String> dateInt = getValueList(response, "percentile_60", "fieldFacets", "int_id", "date", false);
-    ArrayList<String> dateIntTest = (ArrayList<String>)calculateStat(dateIntTestStart, "perc_60");
+    ArrayList<String> dateIntTest = (ArrayList<String>)calculateFacetedStat(dateIntTestStart, "perc_60");
     assertEquals(responseStr,dateInt,dateIntTest);
     //Date Long
     Collection<String> dateString = getValueList(response, "percentile_60", "fieldFacets", "long_ld", "date", false);
-    ArrayList<String> dateLongTest = (ArrayList<String>)calculateStat(dateLongTestStart, "perc_60");
+    ArrayList<String> dateLongTest = (ArrayList<String>)calculateFacetedStat(dateLongTestStart, "perc_60");
     assertEquals(responseStr,dateString,dateLongTest);
 
     //String Int
     Collection<String> stringInt = getValueList(response, "percentile_60", "fieldFacets", "int_id", "str", false);
-    ArrayList<String> stringIntTest = (ArrayList<String>)calculateStat(stringIntTestStart, "perc_60");
+    ArrayList<String> stringIntTest = (ArrayList<String>)calculateFacetedStat(stringIntTestStart, "perc_60");
     assertEquals(responseStr,stringInt,stringIntTest);
     //String Long
     Collection<String> stringLong = getValueList(response, "percentile_60", "fieldFacets", "long_ld", "str", false);
-    ArrayList<String> stringLongTest = (ArrayList<String>)calculateStat(stringLongTestStart, "perc_60");
+    ArrayList<String> stringLongTest = (ArrayList<String>)calculateFacetedStat(stringLongTestStart, "perc_60");
     assertEquals(responseStr,stringLong,stringLongTest);
   }
 
@@ -767,61 +767,61 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.min.ff", "int_id",
         "o.min.ff", "long_ld"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Date
     Collection<Integer> intDate = getValueList(response, "minn", "fieldFacets", "date_dtd", "int", false);
-    ArrayList<Integer> intDateTest = (ArrayList<Integer>)calculateStat(intDateTestStart, "min");
+    ArrayList<Integer> intDateTest = (ArrayList<Integer>)calculateFacetedStat(intDateTestStart, "min");
     assertEquals(responseStr,intDate,intDateTest);
     //Int String
     Collection<Integer> intString = getValueList(response, "minn", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Integer> intStringTest = (ArrayList<Integer>)calculateStat(intStringTestStart, "min");
+    ArrayList<Integer> intStringTest = (ArrayList<Integer>)calculateFacetedStat(intStringTestStart, "min");
     assertEquals(responseStr,intString,intStringTest);
 
     //Long Date
     Collection<Long> longDate = getValueList(response, "minn", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateStat(longDateTestStart, "min");
+    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateFacetedStat(longDateTestStart, "min");
     assertEquals(responseStr,longDate,longDateTest);
     //Long String
     Collection<Long> longString = getValueList(response, "minn", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateStat(longStringTestStart, "min");
+    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateFacetedStat(longStringTestStart, "min");
     assertEquals(responseStr,longString,longStringTest);
 
     //Float Date
     Collection<Float> floatDate = getValueList(response, "minn", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Float> floatDateTest = (ArrayList<Float>)calculateStat(floatDateTestStart, "min");
+    ArrayList<Float> floatDateTest = (ArrayList<Float>)calculateFacetedStat(floatDateTestStart, "min");
     assertEquals(responseStr,floatDate,floatDateTest);
     //Float String
     Collection<Float> floatString = getValueList(response, "minn", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Float> floatStringTest = (ArrayList<Float>)calculateStat(floatStringTestStart, "min");
+    ArrayList<Float> floatStringTest = (ArrayList<Float>)calculateFacetedStat(floatStringTestStart, "min");
     assertEquals(responseStr,floatString,floatStringTest);
 
     //Double Date
     Collection<Double> doubleDate = getValueList(response, "minn", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Double> doubleDateTest = (ArrayList<Double>)calculateStat(doubleDateTestStart, "min");
+    ArrayList<Double> doubleDateTest = (ArrayList<Double>)calculateFacetedStat(doubleDateTestStart, "min");
     assertEquals(responseStr,doubleDate,doubleDateTest);
     //Double String
     Collection<Double> doubleString = getValueList(response, "minn", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Double> doubleStringTest = (ArrayList<Double>)calculateStat(doubleStringTestStart, "min");
+    ArrayList<Double> doubleStringTest = (ArrayList<Double>)calculateFacetedStat(doubleStringTestStart, "min");
     assertEquals(responseStr,doubleString,doubleStringTest);
 
     //Date Int
     Collection<String> dateInt = getValueList(response, "min", "fieldFacets", "int_id", "date", false);
-    ArrayList<String> dateIntTest = (ArrayList<String>)calculateStat(dateIntTestStart, "min");
+    ArrayList<String> dateIntTest = (ArrayList<String>)calculateFacetedStat(dateIntTestStart, "min");
     assertEquals(responseStr,dateInt,dateIntTest);
     //Date Long
     Collection<String> dateString = getValueList(response, "min", "fieldFacets", "long_ld", "date", false);
-    ArrayList<String> dateLongTest = (ArrayList<String>)calculateStat(dateLongTestStart, "min");
+    ArrayList<String> dateLongTest = (ArrayList<String>)calculateFacetedStat(dateLongTestStart, "min");
     assertEquals(responseStr,dateString,dateLongTest);
 
     //String Int
     Collection<String> stringInt = getValueList(response, "min", "fieldFacets", "int_id", "str", false);
-    ArrayList<String> stringIntTest = (ArrayList<String>)calculateStat(stringIntTestStart, "min");
+    ArrayList<String> stringIntTest = (ArrayList<String>)calculateFacetedStat(stringIntTestStart, "min");
     assertEquals(responseStr,stringInt,stringIntTest);
     //String Long
     Collection<String> stringLong = getValueList(response, "min", "fieldFacets", "long_ld", "str", false);
-    ArrayList<String> stringLongTest = (ArrayList<String>)calculateStat(stringLongTestStart, "min");
+    ArrayList<String> stringLongTest = (ArrayList<String>)calculateFacetedStat(stringLongTestStart, "min");
     assertEquals(responseStr,stringLong,stringLongTest);
   }
 
@@ -841,67 +841,67 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.max.ff", "int_id",
         "o.max.ff", "long_ld"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Date
     Collection<Integer> intDate = getValueList(response, "maxn", "fieldFacets", "date_dtd", "int", false);
-    ArrayList<Integer> intDateTest = (ArrayList<Integer>)calculateStat(intDateTestStart, "max");
+    ArrayList<Integer> intDateTest = (ArrayList<Integer>)calculateFacetedStat(intDateTestStart, "max");
     assertEquals(responseStr,intDate,intDateTest);
     
     //Int String
     Collection<Integer> intString = getValueList(response, "maxn", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Integer> intStringTest = (ArrayList<Integer>)calculateStat(intStringTestStart, "max");
+    ArrayList<Integer> intStringTest = (ArrayList<Integer>)calculateFacetedStat(intStringTestStart, "max");
     assertEquals(responseStr,intString,intStringTest);
 
     //Long Date
     Collection<Long> longDate = getValueList(response, "maxn", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateStat(longDateTestStart, "max");
+    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateFacetedStat(longDateTestStart, "max");
     assertEquals(responseStr,longDate,longDateTest);
     
     //Long String
     Collection<Long> longString = getValueList(response, "maxn", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateStat(longStringTestStart, "max");
+    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateFacetedStat(longStringTestStart, "max");
     assertEquals(responseStr,longString,longStringTest);
 
     //Float Date
     Collection<Float> floatDate = getValueList(response, "maxn", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Float> floatDateTest = (ArrayList<Float>)calculateStat(floatDateTestStart, "max");
+    ArrayList<Float> floatDateTest = (ArrayList<Float>)calculateFacetedStat(floatDateTestStart, "max");
     assertEquals(responseStr,floatDate,floatDateTest);
     
     //Float String
     Collection<Float> floatString = getValueList(response, "maxn", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Float> floatStringTest = (ArrayList<Float>)calculateStat(floatStringTestStart, "max");
+    ArrayList<Float> floatStringTest = (ArrayList<Float>)calculateFacetedStat(floatStringTestStart, "max");
     assertEquals(responseStr,floatString,floatStringTest);
 
     //Double Date
     Collection<Double> doubleDate = getValueList(response, "maxn", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Double> doubleDateTest = (ArrayList<Double>)calculateStat(doubleDateTestStart, "max");
+    ArrayList<Double> doubleDateTest = (ArrayList<Double>)calculateFacetedStat(doubleDateTestStart, "max");
     assertEquals(responseStr,doubleDate,doubleDateTest);
     
     //Double String
     Collection<Double> doubleString = getValueList(response, "maxn", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Double> doubleStringTest = (ArrayList<Double>)calculateStat(doubleStringTestStart, "max");
+    ArrayList<Double> doubleStringTest = (ArrayList<Double>)calculateFacetedStat(doubleStringTestStart, "max");
     assertEquals(responseStr,doubleString,doubleStringTest);
     
     //String Int
     Collection<String> stringInt = getValueList(response, "max", "fieldFacets", "int_id", "str", false);
-    ArrayList<String> stringIntTest = (ArrayList<String>)calculateStat(stringIntTestStart, "max");
+    ArrayList<String> stringIntTest = (ArrayList<String>)calculateFacetedStat(stringIntTestStart, "max");
     assertEquals(responseStr,stringInt,stringIntTest);
     
     //String Long
     Collection<String> stringLong = getValueList(response, "max", "fieldFacets", "long_ld", "str", false);
-    ArrayList<String> stringLongTest = (ArrayList<String>)calculateStat(stringLongTestStart, "max");
+    ArrayList<String> stringLongTest = (ArrayList<String>)calculateFacetedStat(stringLongTestStart, "max");
     assertEquals(responseStr,stringLong,stringLongTest);
 
     //Date Int
     Collection<String> dateInt = getValueList(response, "max", "fieldFacets", "int_id", "date", false);
-    ArrayList<String> dateIntTest = (ArrayList<String>)calculateStat(dateIntTestStart, "max");
+    ArrayList<String> dateIntTest = (ArrayList<String>)calculateFacetedStat(dateIntTestStart, "max");
     assertEquals(responseStr,dateInt,dateIntTest);
     
     //Date Long
     Collection<String> dateString = getValueList(response, "max", "fieldFacets", "long_ld", "date", false);
-    ArrayList<String> dateLongTest = (ArrayList<String>)calculateStat(dateLongTestStart, "max");
+    ArrayList<String> dateLongTest = (ArrayList<String>)calculateFacetedStat(dateLongTestStart, "max");
     assertEquals(responseStr,dateString,dateLongTest);
 
   }
@@ -922,61 +922,61 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.unique.ff", "int_id",
         "o.unique.ff", "long_ld"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Date
     Collection<Long> intDate = getValueList(response, "uniquen", "fieldFacets", "date_dtd", "int", false);
-    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateStat(intDateTestStart, "unique");
+    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateFacetedStat(intDateTestStart, "unique");
     assertEquals(responseStr,intDate,intDateTest);
     //Int String
     Collection<Long> intString = getValueList(response, "uniquen", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Long> intStringTest = (ArrayList<Long>)calculateStat(intStringTestStart, "unique");
+    ArrayList<Long> intStringTest = (ArrayList<Long>)calculateFacetedStat(intStringTestStart, "unique");
     assertEquals(responseStr,intString,intStringTest);
 
     //Long Date
     Collection<Long> longDate = getValueList(response, "uniquen", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateStat(longDateTestStart, "unique");
+    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateFacetedStat(longDateTestStart, "unique");
     assertEquals(responseStr,longDate,longDateTest);
     //Long String
     Collection<Long> longString = getValueList(response, "uniquen", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateStat(longStringTestStart, "unique");
+    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateFacetedStat(longStringTestStart, "unique");
     assertEquals(responseStr,longString,longStringTest);
 
     //Float Date
     Collection<Long> floatDate = getValueList(response, "uniquen", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Long> floatDateTest = (ArrayList<Long>)calculateStat(floatDateTestStart, "unique");
+    ArrayList<Long> floatDateTest = (ArrayList<Long>)calculateFacetedStat(floatDateTestStart, "unique");
     assertEquals(responseStr,floatDate,floatDateTest);
     //Float String
     Collection<Long> floatString = getValueList(response, "uniquen", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Long> floatStringTest = (ArrayList<Long>)calculateStat(floatStringTestStart, "unique");
+    ArrayList<Long> floatStringTest = (ArrayList<Long>)calculateFacetedStat(floatStringTestStart, "unique");
     assertEquals(responseStr,floatString,floatStringTest);
 
     //Double Date
     Collection<Long> doubleDate = getValueList(response, "uniquen", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Long> doubleDateTest = (ArrayList<Long>)calculateStat(doubleDateTestStart, "unique");
+    ArrayList<Long> doubleDateTest = (ArrayList<Long>)calculateFacetedStat(doubleDateTestStart, "unique");
     assertEquals(responseStr,doubleDate,doubleDateTest);
     //Double String
     Collection<Long> doubleString = getValueList(response, "uniquen", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Long> doubleStringTest = (ArrayList<Long>)calculateStat(doubleStringTestStart, "unique");
+    ArrayList<Long> doubleStringTest = (ArrayList<Long>)calculateFacetedStat(doubleStringTestStart, "unique");
     assertEquals(responseStr,doubleString,doubleStringTest);
 
     //Date Int
     Collection<Long> dateInt = getValueList(response, "unique", "fieldFacets", "int_id", "date", false);
-    ArrayList<Long> dateIntTest = (ArrayList<Long>)calculateStat(dateIntTestStart, "unique");
+    ArrayList<Long> dateIntTest = (ArrayList<Long>)calculateFacetedStat(dateIntTestStart, "unique");
     assertEquals(responseStr,dateInt,dateIntTest);
     //Date Long
     Collection<Long> dateString = getValueList(response, "unique", "fieldFacets", "long_ld", "date", false);
-    ArrayList<Long> dateLongTest = (ArrayList<Long>)calculateStat(dateLongTestStart, "unique");
+    ArrayList<Long> dateLongTest = (ArrayList<Long>)calculateFacetedStat(dateLongTestStart, "unique");
     assertEquals(responseStr,dateString,dateLongTest);
 
     //String Int
     Collection<Long> stringInt = getValueList(response, "unique", "fieldFacets", "int_id", "str", false);
-    ArrayList<Long> stringIntTest = (ArrayList<Long>)calculateStat(stringIntTestStart, "unique");
+    ArrayList<Long> stringIntTest = (ArrayList<Long>)calculateFacetedStat(stringIntTestStart, "unique");
     assertEquals(responseStr,stringInt,stringIntTest);
     //String Long
     Collection<Long> stringLong = getValueList(response, "unique", "fieldFacets", "long_ld", "str", false);
-    ArrayList<Long> stringLongTest = (ArrayList<Long>)calculateStat(stringLongTestStart, "unique");
+    ArrayList<Long> stringLongTest = (ArrayList<Long>)calculateFacetedStat(stringLongTestStart, "unique");
     assertEquals(responseStr,stringLong,stringLongTest);
   }
 
@@ -996,67 +996,67 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.count.ff", "int_id",
         "o.count.ff", "long_ld"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Date
     Collection<Long> intDate = getValueList(response, "countn", "fieldFacets", "date_dtd", "int", false);
-    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateStat(intDateTestStart, "count");
+    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateFacetedStat(intDateTestStart, "count");
     assertEquals(responseStr,intDate,intDateTest);
     
     //Int String
     Collection<Long> intString = getValueList(response, "countn", "fieldFacets", "string_sd", "int", false);
-    ArrayList<Long> intStringTest = (ArrayList<Long>)calculateStat(intStringTestStart, "count");
+    ArrayList<Long> intStringTest = (ArrayList<Long>)calculateFacetedStat(intStringTestStart, "count");
     assertEquals(responseStr,intString,intStringTest);
 
     //Long Date
     Collection<Long> longDate = getValueList(response, "countn", "fieldFacets", "date_dtd", "long", false);
-    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateStat(longDateTestStart, "count");
+    ArrayList<Long> longDateTest = (ArrayList<Long>)calculateFacetedStat(longDateTestStart, "count");
     assertEquals(responseStr,longDate,longDateTest);
     
     //Long String
     Collection<Long> longString = getValueList(response, "countn", "fieldFacets", "string_sd", "long", false);
-    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateStat(longStringTestStart, "count");
+    ArrayList<Long> longStringTest = (ArrayList<Long>)calculateFacetedStat(longStringTestStart, "count");
     assertEquals(responseStr,longString,longStringTest);
 
     //Float Date
     Collection<Long> floatDate = getValueList(response, "countn", "fieldFacets", "date_dtd", "float", false);
-    ArrayList<Long> floatDateTest = (ArrayList<Long>)calculateStat(floatDateTestStart, "count");
+    ArrayList<Long> floatDateTest = (ArrayList<Long>)calculateFacetedStat(floatDateTestStart, "count");
     assertEquals(responseStr,floatDate,floatDateTest);
     
     //Float String
     Collection<Long> floatString = getValueList(response, "countn", "fieldFacets", "string_sd", "float", false);
-    ArrayList<Long> floatStringTest = (ArrayList<Long>)calculateStat(floatStringTestStart, "count");
+    ArrayList<Long> floatStringTest = (ArrayList<Long>)calculateFacetedStat(floatStringTestStart, "count");
     assertEquals(responseStr,floatString,floatStringTest);
 
     //Double Date
     Collection<Long> doubleDate = getValueList(response, "countn", "fieldFacets", "date_dtd", "double", false);
-    ArrayList<Long> doubleDateTest = (ArrayList<Long>)calculateStat(doubleDateTestStart, "count");
+    ArrayList<Long> doubleDateTest = (ArrayList<Long>)calculateFacetedStat(doubleDateTestStart, "count");
     assertEquals(responseStr,doubleDate,doubleDateTest);
     
     //Double String
     Collection<Long> doubleString = getValueList(response, "countn", "fieldFacets", "string_sd", "double", false);
-    ArrayList<Long> doubleStringTest = (ArrayList<Long>)calculateStat(doubleStringTestStart, "count");
+    ArrayList<Long> doubleStringTest = (ArrayList<Long>)calculateFacetedStat(doubleStringTestStart, "count");
     assertEquals(responseStr,doubleString,doubleStringTest);
 
     //Date Int
     Collection<Long> dateInt = getValueList(response, "count", "fieldFacets", "int_id", "date", false);
-    ArrayList<Long> dateIntTest = (ArrayList<Long>)calculateStat(dateIntTestStart, "count");
+    ArrayList<Long> dateIntTest = (ArrayList<Long>)calculateFacetedStat(dateIntTestStart, "count");
     assertEquals(responseStr,dateIntTest,dateInt);
     
     //Date Long
     Collection<Long> dateLong = getValueList(response, "count", "fieldFacets", "long_ld", "date", false);
-    ArrayList<Long> dateLongTest = (ArrayList<Long>)calculateStat(dateLongTestStart, "count");
+    ArrayList<Long> dateLongTest = (ArrayList<Long>)calculateFacetedStat(dateLongTestStart, "count");
     assertEquals(responseStr,dateLong,dateLongTest);
 
     //String Int
     Collection<Long> stringInt = getValueList(response, "count", "fieldFacets", "int_id", "str", false);
-    ArrayList<Long> stringIntTest = (ArrayList<Long>)calculateStat(stringIntTestStart, "count");
+    ArrayList<Long> stringIntTest = (ArrayList<Long>)calculateFacetedStat(stringIntTestStart, "count");
     assertEquals(responseStr,stringInt,stringIntTest);
     
     //String Long
     Collection<Long> stringLong = getValueList(response, "count", "fieldFacets", "long_ld", "str", false);
-    ArrayList<Long> stringLongTest = (ArrayList<Long>)calculateStat(stringLongTestStart, "count");
+    ArrayList<Long> stringLongTest = (ArrayList<Long>)calculateFacetedStat(stringLongTestStart, "count");
     assertEquals(responseStr,stringLong,stringLongTest);
   }
 
@@ -1075,7 +1075,7 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.missing.ff", "int_id",
         "o.missing.ff", "long_ld"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Date
@@ -1142,20 +1142,20 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.multivalued.ff", "string_sdm",
         "o.multivalued.ff", "date_dtdm"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Long
     Collection<Double> lon = getValueList(response, "multivalued", "fieldFacets", "long_ldm", "mean", false);
-    ArrayList<Double> longTest = calculateNumberStat(multiLongTestStart, "mean");
+    ArrayList<Double> longTest = calculateFacetedNumberStat(multiLongTestStart, "mean");
     assertEquals(responseStr,lon,longTest);
     //Date
     Collection<Double> date = getValueList(response, "multivalued", "fieldFacets", "date_dtdm", "mean", false);
-    ArrayList<Double> dateTest = calculateNumberStat(multiDateTestStart, "mean");
+    ArrayList<Double> dateTest = calculateFacetedNumberStat(multiDateTestStart, "mean");
     assertEquals(responseStr,date,dateTest);
     //String
     Collection<Double> string = getValueList(response, "multivalued", "fieldFacets", "string_sdm", "mean", false);
-    ArrayList<Double> stringTest = calculateNumberStat(multiStringTestStart, "mean");
+    ArrayList<Double> stringTest = calculateFacetedNumberStat(multiStringTestStart, "mean");
     assertEquals(responseStr,string,stringTest);
   }
   
@@ -1170,26 +1170,26 @@ public class LegacyFieldFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.missingf.ff", "date_dtdm",
         "o.missingf.ff.date_dtdm.sm", "true"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //int MultiDate
     assertTrue(responseStr, responseContainsFacetValue(response, "missingf", "fieldFacets", "date_dtdm", "(MISSING)"));
     ArrayList<Double> string = getValueList(response, "missingf", "fieldFacets", "date_dtdm", "mean", false);
-    ArrayList<Double> stringTest = calculateNumberStat(multiDateTestStart, "mean");
+    ArrayList<Double> stringTest = calculateFacetedNumberStat(multiDateTestStart, "mean");
     assertEquals(responseStr, string,stringTest);
     
     //Int String
     assertTrue(responseStr, responseContainsFacetValue(response, "missingf", "fieldFacets", "string_sd", "(MISSING)"));
     assertTrue(responseStr, !responseContainsFacetValue(response, "missingf", "fieldFacets", "string_sd", "str0"));
     List<Double> intString = getValueList(response, "missingf", "fieldFacets", "string_sd", "mean", false);
-    ArrayList<Double> intStringTest = calculateNumberStat(intStringTestStart, "mean");
+    ArrayList<Double> intStringTest = calculateFacetedNumberStat(intStringTestStart, "mean");
     assertEquals(responseStr, intString,intStringTest);
     
     //Int Date
     Collection<Double> intDate = getValueList(response, "missingf", "fieldFacets", "date_dtd", "mean", false);
     ArrayList<ArrayList<Double>> intDateMissingTestStart = (ArrayList<ArrayList<Double>>) intDateTestStart.clone();
-    ArrayList<Double> intDateTest = calculateNumberStat(intDateMissingTestStart, "mean");
+    ArrayList<Double> intDateTest = calculateFacetedNumberStat(intDateMissingTestStart, "mean");
     assertEquals(responseStr,intDate,intDateTest);
   }
 

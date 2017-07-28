@@ -20,7 +20,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.solr.SolrTestCaseJ4;
+import org.apache.solr.analytics.value.AnalyticsValueStream.ExpressionType;
 import org.apache.solr.analytics.value.FillableTestValue.TestStringValue;
+import org.apache.solr.analytics.value.constant.ConstantStringValue;
 import org.junit.Test;
 
 public class CastingStringValueTest extends SolrTestCaseJ4 {
@@ -85,5 +87,34 @@ public class CastingStringValueTest extends SolrTestCaseJ4 {
       assertEquals(values.next(), value);
     });
     assertFalse(values.hasNext());
+  }
+  
+  @Test
+  public void constantConversionTest() {
+    TestStringValue val = new TestStringValue(ExpressionType.CONST);
+    val.setValue("asd23n23").setExists(true);
+    AnalyticsValueStream conv = val.convertToConstant();
+    assertTrue(conv instanceof ConstantStringValue);
+    assertEquals("asd23n23", ((ConstantStringValue)conv).getString());
+
+    val = new TestStringValue(ExpressionType.FIELD);
+    val.setValue("asd23n23").setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestStringValue(ExpressionType.UNREDUCED_MAPPING);
+    val.setValue("asd23n23").setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestStringValue(ExpressionType.REDUCTION);
+    val.setValue("asd23n23").setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestStringValue(ExpressionType.REDUCED_MAPPING);
+    val.setValue("asd23n23").setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
   }
 }

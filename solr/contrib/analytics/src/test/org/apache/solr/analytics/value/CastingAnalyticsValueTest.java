@@ -47,4 +47,10 @@ public class CastingAnalyticsValueTest extends SolrTestCaseJ4 {
     });
     assertFalse(values.hasNext());
   }
+  
+  @Test
+  public void constantConversionTest() {
+    AnalyticsValueStream val = new TestAnalyticsValue();
+    assertSame(val, val.convertToConstant());
+  }
 }

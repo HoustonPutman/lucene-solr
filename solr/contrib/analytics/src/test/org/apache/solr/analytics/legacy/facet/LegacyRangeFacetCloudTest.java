@@ -46,7 +46,7 @@ public class LegacyRangeFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
   
   @BeforeClass
   public static void beforeClass() throws Exception {
-    setupCluster();
+    cleanIndex();
     
     //INT
     intLongTestStart = new ArrayList<>();
@@ -174,33 +174,33 @@ public class LegacyRangeFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.rf.rf.date_dtd.or", "all"
     };
     
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Long
     ArrayList<Long> intLong = getValueList(response, "ri", "rangeFacets", "long_ld", "count", false);
-    ArrayList<Long> intLongTest = calculateStat(transformLists(intLongTestStart, 5, 30, 5
+    ArrayList<Long> intLongTest = calculateFacetedStat(transformLists(intLongTestStart, 5, 30, 5
                                                         , false, true, false, false, false), "count");
     assertEquals(responseStr, intLong,intLongTest);
     //Int Double
     ArrayList<Double> intDouble = getValueList(response, "ri", "rangeFacets", "double_dd", "mean", false);
-    ArrayList<Double> intDoubleTest = calculateNumberStat(transformLists(intDoubleTestStart, 3, 39, 7
+    ArrayList<Double> intDoubleTest = calculateFacetedNumberStat(transformLists(intDoubleTestStart, 3, 39, 7
                                                           , false, false, true, false, true), "mean");
     assertEquals(responseStr, intDouble,intDoubleTest);
     //Int Date
     ArrayList<Long> intDate = getValueList(response, "ri", "rangeFacets", "date_dtd", "count", false);
-    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateStat(transformLists(intDateTestStart, 7, 44, 7
+    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateFacetedStat(transformLists(intDateTestStart, 7, 44, 7
                                                       , false, true, false, true, true), "count");
     assertEquals(responseStr, intDate,intDateTest);
     
     //Float Long
     ArrayList<Double> floatLong = getValueList(response, "rf", "rangeFacets", "long_ld", "median", false);
-    ArrayList<Double> floatLongTest = calculateNumberStat(transformLists(floatLongTestStart, 0, 29, 4
+    ArrayList<Double> floatLongTest = calculateFacetedNumberStat(transformLists(floatLongTestStart, 0, 29, 4
                                                           , false, true, true, true, true), "median");
     assertEquals(responseStr, floatLong,floatLongTest);
     //Float Double
     ArrayList<Long> floatDouble = getValueList(response, "rf", "rangeFacets", "double_dd", "count", false);
-    ArrayList<Long> floatDoubleTest = (ArrayList<Long>)calculateStat(transformLists(floatDoubleTestStart, 4, 47, 11
+    ArrayList<Long> floatDoubleTest = (ArrayList<Long>)calculateFacetedStat(transformLists(floatDoubleTestStart, 4, 47, 11
                                                                      , false, false, false, true, false), "count");
     assertEquals(responseStr, floatDouble,floatDoubleTest);
   }
@@ -266,33 +266,33 @@ public class LegacyRangeFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.hf.rf.date_dtd.ib", "edge",
         "o.hf.rf.date_dtd.or", "all"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Long
     ArrayList<Double> intLong = getValueList(response, "hi", "rangeFacets", "long_ld", "sum", false);
-    ArrayList<Double> intLongTest = calculateNumberStat(transformLists(intLongTestStart, 5, 30, 5
+    ArrayList<Double> intLongTest = calculateFacetedNumberStat(transformLists(intLongTestStart, 5, 30, 5
                                                         , true, true, false, false, false), "sum");
     assertEquals(responseStr, intLong,intLongTest);
     //Int Double
     ArrayList<Double> intDouble = getValueList(response, "hi", "rangeFacets", "double_dd", "mean", false);
-    ArrayList<Double> intDoubleTest = calculateNumberStat(transformLists(intDoubleTestStart, 3, 39, 7
+    ArrayList<Double> intDoubleTest = calculateFacetedNumberStat(transformLists(intDoubleTestStart, 3, 39, 7
                                                           , true, false, true, false, true), "mean");
     assertEquals(responseStr, intDouble,intDoubleTest);
     //Int Date
     ArrayList<Long> intDate = getValueList(response, "hi", "rangeFacets", "date_dtd", "count", false);
-    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateStat(transformLists(intDateTestStart, 7, 44, 7
+    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateFacetedStat(transformLists(intDateTestStart, 7, 44, 7
                                                       , true, true, false, true, true), "count");
     assertEquals(responseStr, intDate,intDateTest);
     
     //Float Long
     ArrayList<Double> floatLong = getValueList(response, "hf", "rangeFacets", "long_ld", "median", false);
-    ArrayList<Double> floatLongTest = calculateNumberStat(transformLists(floatLongTestStart, 0, 29, 4
+    ArrayList<Double> floatLongTest = calculateFacetedNumberStat(transformLists(floatLongTestStart, 0, 29, 4
                                                           , true, true, true, true, true), "median");
     assertEquals(responseStr, floatLong,floatLongTest);
     //Float Double
     ArrayList<Long> floatDouble = getValueList(response, "hf", "rangeFacets", "double_dd", "count", false);
-    ArrayList<Long> floatDoubleTest = (ArrayList<Long>)calculateStat(transformLists(floatDoubleTestStart, 4, 47, 11
+    ArrayList<Long> floatDoubleTest = (ArrayList<Long>)calculateFacetedStat(transformLists(floatDoubleTestStart, 4, 47, 11
                                                                      , true, false, false, true, false), "count");
     assertEquals(responseStr, floatDouble,floatDoubleTest);
   }
@@ -351,33 +351,33 @@ public class LegacyRangeFacetCloudTest extends LegacyAbstractAnalyticsFacetCloud
         "o.mf.rf.date_dtd.ib", "edge",
         "o.mf.rf.date_dtd.or", "all"
     };
-    NamedList<Object> response = queryCloudAnalytics(params);
+    NamedList<Object> response = queryLegacyCloudAnalytics(params);
     String responseStr = response.toString();
     
     //Int Long
     ArrayList<Double> intLong = getValueList(response, "mi", "rangeFacets", "long_ld", "sum", false);
-    ArrayList<Double> intLongTest = calculateNumberStat(transformLists(intLongTestStart, 5, 30, "4,2,6,3"
+    ArrayList<Double> intLongTest = calculateFacetedNumberStat(transformLists(intLongTestStart, 5, 30, "4,2,6,3"
                                                         , false, true, false, false, false), "sum");
     assertEquals(responseStr, intLong,intLongTest);
     //Int Double
     ArrayList<Double> intDouble = getValueList(response, "mi", "rangeFacets", "double_dd", "mean", false);
-    ArrayList<Double> intDoubleTest = calculateNumberStat(transformLists(intDoubleTestStart, 3, 39, "3,1,7"
+    ArrayList<Double> intDoubleTest = calculateFacetedNumberStat(transformLists(intDoubleTestStart, 3, 39, "3,1,7"
                                                           , false, false, true, false, true), "mean");
     assertEquals(responseStr, intDouble,intDoubleTest);
     //Int Date
     ArrayList<Long> intDate = getValueList(response, "mi", "rangeFacets", "date_dtd", "count", false);
-    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateStat(transformLists(intDateTestStart, 7, 44, "2,7"
+    ArrayList<Long> intDateTest = (ArrayList<Long>)calculateFacetedStat(transformLists(intDateTestStart, 7, 44, "2,7"
                                                       , false, true, false, true, true), "count");
     assertEquals(responseStr, intDate,intDateTest);
     
     //Float Long
     ArrayList<Double> floatLong = getValueList(response, "mf", "rangeFacets", "long_ld", "median", false);
-    ArrayList<Double> floatLongTest = calculateNumberStat(transformLists(floatLongTestStart, 0, 29, "1,4"
+    ArrayList<Double> floatLongTest = calculateFacetedNumberStat(transformLists(floatLongTestStart, 0, 29, "1,4"
                                                           , false, true, true, true, true), "median");;
     assertEquals(responseStr, floatLong,floatLongTest);
     //Float Double
     ArrayList<Long> floatDouble = getValueList(response, "mf", "rangeFacets", "double_dd", "count", false);
-    ArrayList<Long> floatDoubleTest = (ArrayList<Long>)calculateStat(transformLists(floatDoubleTestStart, 4, 47, "2,3,11"
+    ArrayList<Long> floatDoubleTest = (ArrayList<Long>)calculateFacetedStat(transformLists(floatDoubleTestStart, 4, 47, "2,3,11"
                                                           , false, false, false, true, false), "count");
     assertEquals(responseStr, floatDouble,floatDoubleTest);
   }

@@ -102,4 +102,10 @@ public class CastingDateValueStreamTest extends SolrTestCaseJ4 {
     });
     assertFalse(values.hasNext());
   }
+  
+  @Test
+  public void constantConversionTest() {
+    AnalyticsValueStream val = new TestDateValueStream();
+    assertSame(val, val.convertToConstant());
+  }
 }

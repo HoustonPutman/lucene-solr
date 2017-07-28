@@ -70,4 +70,10 @@ public class CastingBooleanValueStreamTest extends SolrTestCaseJ4 {
     });
     assertFalse(values.hasNext());
   }
+  
+  @Test
+  public void constantConversionTest() {
+    AnalyticsValueStream val = new TestBooleanValueStream();
+    assertSame(val, val.convertToConstant());
+  }
 }

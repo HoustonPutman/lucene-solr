@@ -20,7 +20,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.solr.SolrTestCaseJ4;
+import org.apache.solr.analytics.value.AnalyticsValueStream.ExpressionType;
 import org.apache.solr.analytics.value.FillableTestValue.TestDoubleValue;
+import org.apache.solr.analytics.value.constant.ConstantDoubleValue;
 import org.junit.Test;
 
 public class CastingDoubleValueTest extends SolrTestCaseJ4 {
@@ -124,5 +126,34 @@ public class CastingDoubleValueTest extends SolrTestCaseJ4 {
       assertEquals(values.next(), value);
     });
     assertFalse(values.hasNext());
+  }
+  
+  @Test
+  public void constantConversionTest() {
+    TestDoubleValue val = new TestDoubleValue(ExpressionType.CONST);
+    val.setValue(12354.234).setExists(true);
+    AnalyticsValueStream conv = val.convertToConstant();
+    assertTrue(conv instanceof ConstantDoubleValue);
+    assertEquals(12354.234, ((ConstantDoubleValue)conv).getDouble(), .0000001);
+
+    val = new TestDoubleValue(ExpressionType.FIELD);
+    val.setValue(12354.234).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestDoubleValue(ExpressionType.UNREDUCED_MAPPING);
+    val.setValue(12354.234).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestDoubleValue(ExpressionType.REDUCTION);
+    val.setValue(12354.234).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
+
+    val = new TestDoubleValue(ExpressionType.REDUCED_MAPPING);
+    val.setValue(12354.234).setExists(true);
+    conv = val.convertToConstant();
+    assertSame(val, conv);
   }
 }

@@ -384,6 +384,9 @@ public class ExpressionFactory {
 
     final String[] params = getParams(expressionStr, varFuncVarParamName, varFuncVarParamValues);
     AnalyticsValueStream[] paramStreams = new AnalyticsValueStream[params.length];
+    
+    boolean allParamsConstant = true;
+    
     for (int i = 0; i < params.length; i++) {
       // First check if the parameter is a variable function variable otherwise create the expression
       if (varFuncParams.containsKey(params[i])) {
@@ -391,7 +394,11 @@ public class ExpressionFactory {
       } else {
         paramStreams[i] = createExpression(params[i], varFuncParams, varFuncVarParamName, varFuncVarParamValues);
       }
+      
+      // Then update whether all of the params are constant
+      allParamsConstant &= paramStreams[i].getExpressionType().equals(ExpressionType.CONST);
     }
+    
     // Check to see if the function name is a variable function name, if so apply the variables to the return signature
     if (variableFunctions.containsKey(name)) {
       if (variableFunctionNameHistory.contains(name)) {
@@ -403,6 +410,10 @@ public class ExpressionFactory {
       
       boolean varLenEnd = false;
       
+      if (paramStreams.length < newVarFunc.params.length) {
+        throw new SolrException(ErrorCode.BAD_REQUEST,"The variable function '" + name + "' requires at least " + newVarFunc.params.length + " parameters."
+            + " Only " + paramStreams.length + " arguments given in the following invocation : " + expressionStr);
+      }
       for (int i = 0; i < newVarFunc.params.length; ++i) {
         String variable = newVarFunc.params[i];
         if (variable.endsWith(variableLengthParamSuffix)) {
@@ -425,16 +436,23 @@ public class ExpressionFactory {
         }
       }
       if (!varLenEnd) {
+        if (paramStreams.length > newVarFunc.params.length) {
+          throw new SolrException(ErrorCode.BAD_REQUEST,"The variable function '" + name + "' requires " + newVarFunc.params.length + " parameters."
+              + " " + paramStreams.length + " arguments given in the following invocation : " + expressionStr);
+        }
         expression = createExpression(newVarFunc.returnSignature, newVarFuncParams, null, null);
       }
       variableFunctionNameHistory.remove(name);
-      return expression;
     } else if (expressionCreators.containsKey(name)) {
       // It is a regular system function
       expression = expressionCreators.get(name).apply(paramStreams);
     } else {
       throw new SolrException(ErrorCode.BAD_REQUEST,"The following function does not exist: " + name);
     }
+    
+    // If the all params are constant, then try to convert the expression to a constant value.
+    expression = expression.convertToConstant();
+    
     return expression;
   }
 
@@ -773,6 +791,7 @@ public class ExpressionFactory {
     expressionCreators.put(DateParseFunction.name, DateParseFunction.creatorFunction);
     expressionCreators.put(DivideFunction.name, DivideFunction.creatorFunction);
     expressionCreators.put(EqualFunction.name,EqualFunction.creatorFunction);
+    expressionCreators.put(ExistsFunction.name,ExistsFunction.creatorFunction);
     expressionCreators.put(FillMissingFunction.name, FillMissingFunction.creatorFunction);
     expressionCreators.put(FilterFunction.name, FilterFunction.creatorFunction);
     expressionCreators.put(FloorFunction.name, FloorFunction.creatorFunction);
@@ -836,9 +855,9 @@ class VariableFunctionInfo {
   public String returnSignature;
 }
 class WeightedMeanVariableFunction {
-  public static final String name = "weighted_mean";
+  public static final String name = "wmean";
   public static final String params = "a,b";
-  public static final String function = DivideFunction.name+"("+MeanFunction.name+"("+MultFunction.name+"(a,b)),"+SumFunction.name+"(b))";
+  public static final String function = DivideFunction.name+"("+SumFunction.name+"("+MultFunction.name+"(a,b)),"+SumFunction.name+"("+FilterFunction.name+"(b,"+ExistsFunction.name+"(a))))";
 }
 class SumOfSquaresVariableFunction {
   public static final String name = "sumofsquares";

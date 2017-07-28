@@ -139,4 +139,10 @@ public class CastingIntValueStreamTest extends SolrTestCaseJ4 {
     });
     assertFalse(values.hasNext());
   }
+  
+  @Test
+  public void constantConversionTest() {
+    AnalyticsValueStream val = new TestIntValueStream();
+    assertSame(val, val.convertToConstant());
+  }
 }

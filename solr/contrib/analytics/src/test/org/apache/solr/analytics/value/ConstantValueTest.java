@@ -79,6 +79,30 @@ public class ConstantValueTest extends SolrTestCaseJ4 {
     assertTrue(uncasted instanceof ConstantDateValue);
     assertEquals(ExtractionDateUtil.parseDate("1800-01-01CDT"), ((ConstantDateValue)uncasted).getDate());
   }
+  
+  @Test
+  public void constantConversionTest() {
+    AnalyticsValueStream val = new ConstantBooleanValue(true);
+    assertSame(val, val.convertToConstant());
+
+    val = new ConstantIntValue(123);
+    assertSame(val, val.convertToConstant());
+
+    val = new ConstantLongValue(123L);
+    assertSame(val, val.convertToConstant());
+
+    val = new ConstantFloatValue(123F);
+    assertSame(val, val.convertToConstant());
+
+    val = new ConstantDoubleValue(123.0);
+    assertSame(val, val.convertToConstant());
+
+    val = new ConstantDateValue(123L);
+    assertSame(val, val.convertToConstant());
+
+    val = new ConstantStringValue("123");
+    assertSame(val, val.convertToConstant());
+  }
 
   @Test
   public void constantBooleanTest() {

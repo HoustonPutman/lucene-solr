@@ -26,6 +26,7 @@ import org.apache.solr.analytics.util.function.BooleanConsumer;
 import org.apache.solr.analytics.util.function.FloatConsumer;
 import org.apache.solr.analytics.value.AnalyticsValue;
 import org.apache.solr.analytics.value.AnalyticsValueStream;
+import org.apache.solr.analytics.value.AnalyticsValueStream.AbstractAnalyticsValueStream;
 import org.apache.solr.analytics.value.BooleanValue;
 import org.apache.solr.analytics.value.BooleanValueStream;
 import org.apache.solr.analytics.value.DateValue;
@@ -131,7 +132,7 @@ public class RemoveFunction {
     return new StreamRemoveFunction(baseExpr,removeExpr);
   });
 }
-class StreamRemoveFunction implements AnalyticsValueStream {
+class StreamRemoveFunction extends AbstractAnalyticsValueStream {
   private final AnalyticsValueStream baseExpr;
   private final AnalyticsValue removeExpr;
   public static final String name = RemoveFunction.name;

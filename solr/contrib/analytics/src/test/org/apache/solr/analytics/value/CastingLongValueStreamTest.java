@@ -93,4 +93,10 @@ public class CastingLongValueStreamTest extends SolrTestCaseJ4 {
     });
     assertFalse(values.hasNext());
   }
+  
+  @Test
+  public void constantConversionTest() {
+    AnalyticsValueStream val = new TestLongValueStream();
+    assertSame(val, val.convertToConstant());
+  }
 }

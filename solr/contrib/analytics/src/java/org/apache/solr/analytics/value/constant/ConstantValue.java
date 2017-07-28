@@ -17,12 +17,12 @@
 package org.apache.solr.analytics.value.constant;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.solr.analytics.ExpressionFactory.ConstantFunction;
+import org.apache.solr.analytics.value.AnalyticsValue;
 import org.apache.solr.analytics.value.AnalyticsValueStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -48,16 +48,9 @@ import org.apache.solr.handler.extraction.ExtractionDateUtil;
  * </li> 
  * </ul>
  */
-public abstract class ConstantValue {
+public abstract class ConstantValue implements AnalyticsValue {
   private static final Pattern truePattern = Pattern.compile("^true|t$", Pattern.CASE_INSENSITIVE);
   private static final Pattern falsePattern = Pattern.compile("^false|f$", Pattern.CASE_INSENSITIVE);
-  private static final SimpleDateFormat dateParserBase = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
-  private static final SimpleDateFormat dateParser1 = new SimpleDateFormat("yyyy-MM-ddZ", Locale.ROOT);
-  private static final SimpleDateFormat dateParser2 = new SimpleDateFormat("yyyy-MM-ddXXX", Locale.ROOT);
-  private static final SimpleDateFormat dateParser3 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ROOT);
-  private static final SimpleDateFormat dateParser4 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ROOT);
-  private static final SimpleDateFormat dateParser5 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ROOT);
-  private static final SimpleDateFormat dateParser6 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ROOT);
   
   public static final ConstantFunction creatorFunction = (param -> {
     param = param.trim();
@@ -100,6 +93,11 @@ public abstract class ConstantValue {
     }
     
   });
+  
+  @Override
+  public AnalyticsValue convertToConstant() {
+    return this;
+  }
   
   static String createExpressionString(AnalyticsValueStream func, 
                                        Object param) {
