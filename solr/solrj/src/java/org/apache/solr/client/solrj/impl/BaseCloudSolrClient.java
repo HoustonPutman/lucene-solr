@@ -508,6 +508,9 @@ public abstract class BaseCloudSolrClient extends SolrClient {
     //The value is a list of URLs for each replica in the slice.
     //The first value in the list is the leader for the slice.
     final Map<String,List<String>> urlMap = buildUrlMap(col, replicaListTransformer);
+
+    // The urlMap will not contain any slices without leaders.
+    // If any documents are destined for these leader-less slices, routes will be returned as null.
     final Map<String, ? extends LBSolrClient.Req> routes = createRoutes(updateRequest, routableParams, col, router, urlMap, idField);
     if (routes == null) {
       if (directUpdatesToLeadersOnly && hasInfoToFindLeaders(updateRequest, idField)) {
@@ -635,20 +638,10 @@ public abstract class BaseCloudSolrClient extends SolrClient {
       String name = slice.getName();
       List<Replica> sortedReplicas = new ArrayList<>();
       Replica leader = slice.getLeader();
-      if (directUpdatesToLeadersOnly && leader == null) {
-        for (Replica replica : slice.getReplicas(
-            replica -> replica.isActive(getClusterStateProvider().getLiveNodes())
-                && replica.getType() == Replica.Type.NRT)) {
-          leader = replica;
-          break;
-        }
-      }
       if (leader == null) {
-        if (directUpdatesToLeadersOnly) {
-          continue;
-        }
         // take unoptimized general path - we cannot find a leader yet
-        return null;
+        // Unoptimized path will only be taken if any documents are being sent to this shard
+        continue;
       }
 
       if (!directUpdatesToLeadersOnly) {

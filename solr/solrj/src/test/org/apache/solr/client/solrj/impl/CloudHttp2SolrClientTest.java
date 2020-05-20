@@ -71,11 +71,8 @@ import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.handler.admin.CollectionsHandler;
 import org.apache.solr.handler.admin.ConfigSetsHandler;
 import org.apache.solr.handler.admin.CoreAdminHandler;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.hamcrest.CoreMatchers;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -900,7 +897,6 @@ public class CloudHttp2SolrClientTest extends SolrCloudTestCase {
     // NOTE: creating our own CloudSolrClient whose settings we can muck with...
     try (CloudSolrClient stale_client = new CloudSolrClientBuilder
         (Collections.singletonList(cluster.getZkServer().getZkAddress()), Optional.empty())
-        .sendDirectUpdatesToAnyShardReplica()
         .withParallelUpdates(true)
         .build()) {
       // don't let collection cache entries get expired, even on a slow machine...
@@ -928,12 +924,25 @@ public class CloudHttp2SolrClientTest extends SolrCloudTestCase {
         (COL, cluster.getSolrClient().getZkStateReader(), true, true, 330);
 
       // stale_client's collection state cache should now only point at a leader that no longer exists.
-      
-      // attempt a (direct) update that should succeed in spite of cached cluster state
-      // pointing solely to a node that's no longer part of our collection...
-      assertEquals(0, (new UpdateRequest().add("id", "1").commit(stale_client, COL)).getStatus());
-      assertEquals(1, stale_client.query(new SolrQuery("*:*")).getResults().getNumFound());
-      
+
+
+      // This option is randomized
+      if (stale_client.isDirectUpdatesToLeadersOnly()) {
+        try {
+          new UpdateRequest().add("id", "1").commit(stale_client, COL);
+          Assert.fail("The directUpdate request should fail as there is no leader to send the request to");
+        } catch (SolrException se) {
+          Assert.assertEquals("The wrong type of exception code was given for a directUpdate to a shard with no leader.", SolrException.ErrorCode.SERVICE_UNAVAILABLE.code, se.code());
+          Assert.assertThat("The wrong type of exception code was given for a directUpdate to a shard with no leader.", se.getMessage(), CoreMatchers.containsString("directUpdatesToLeadersOnly"));
+        } catch (Throwable e) {
+          Assert.fail("The directUpdate request failed with the incorrect exception when there was no leader to send the request to. Expected: SolrException, Found: " + e.getClass());
+        }
+      } else {
+        // attempt a (direct) update that should succeed in spite of cached cluster state
+        // pointing solely to a node that's no longer part of our collection...
+        assertEquals(0, (new UpdateRequest().add("id", "1").commit(stale_client, COL)).getStatus());
+        assertEquals(1, stale_client.query(new SolrQuery("*:*")).getResults().getNumFound());
+      }
     }
   }
   

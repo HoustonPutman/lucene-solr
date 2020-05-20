@@ -268,7 +268,8 @@ public class UpdateRequest extends AbstractUpdateRequest {
           return null;
         }
         List<String> urls = urlMap.get(slice.getName());
-        if (urls == null) {
+        if (urls == null || urls.size() == 0) {
+          // No leader found for this slice
           return null;
         }
         String leaderUrl = urls.get(0);
